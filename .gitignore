@@ -1,0 +1,9 @@
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
+*.rbc
+*.log
+.rbx
+.*.swp
+test/dummy/tmp/*
