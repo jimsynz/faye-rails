@@ -1,4 +1,6 @@
 require 'faye-rails/version'
+require 'faye-rails/routing_hooks'
+require 'faye-rails/server_list'
 
 module FayeRails
   ROOT = File.expand_path(File.dirname(__FILE__))
@@ -7,17 +9,30 @@ module FayeRails
   end
 
   autoload :Controller,     File.join(ROOT, 'faye-rails', 'controller')
+  autoload :RackAdapter,    File.join(ROOT, 'faye-rails', 'rack_adapter')
 
-  def self.server
-    @server
+  def self.servers
+    @servers ||= ServerList.new
   end
 
-  def self.server=(x)
-    @server=x
+  def self.server(where=nil)
+    if where
+      servers.at(where).first
+    else
+      servers.first
+    end
   end
 
-  def self.client
-    server && server.get_client
+  def self.clients
+    servers.map(&:get_client)
+  end
+
+  def self.client(where=nil)
+    if where
+      servers.at(where).first.get_client
+    else
+      servers.first.get_client
+    end
   end
   
 end

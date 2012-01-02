@@ -19,9 +19,9 @@ module FayeRails
 
     # Pass in the name of a channel to subscribe to
     # and anytime 
-    def self.subscribe(channel, &block)
+    def self.subscribe(channel, endpoint=nil, &block)
       if block && block.respond_to?(:call)
-        FayeRails.client.subscribe(channel) do |message|
+        FayeRails.client(endpoint).subscribe(channel) do |message|
           instance_eval do
             block.call message
           end
@@ -30,8 +30,8 @@ module FayeRails
       end
     end
 
-    def publish(channel, message)
-      FayeRails.client.publish(channel, message)
+    def publish(channel, message, endpoint=nil)
+      FayeRails.client(endpoint).publish(channel, message)
     end
 
   end
