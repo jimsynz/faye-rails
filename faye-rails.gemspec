@@ -4,7 +4,7 @@ require "faye-rails/version"
 
 Gem::Specification.new do |s|
   s.name        = "faye-rails"
-  s.version     = "#{FayeRails::VERSION}.1"
+  s.version     = "#{FayeRails::VERSION}"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["James Harton"]
   s.email       = ["james@sociable.co.nz"]
