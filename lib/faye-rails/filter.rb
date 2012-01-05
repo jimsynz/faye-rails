@@ -4,7 +4,16 @@ module FayeRails
     attr_accessor :server
     attr_reader   :channel
 
-    def initialize(channel, direction=:any, block)
+    # Create a new FayeRails::Filter which can be passed to
+    # Faye::RackAdapter#add_extension.
+    #
+    # @param channel
+    #   Optional channel name to limit messages to.
+    # @param direction
+    #   :in, :out or :any.
+    # @param block
+    #   A proc object to be called when filtering messages.
+    def initialize(channel=nil, direction=:any, block)
       @channel = channel
       raise ArgumentError, "Block cannot be nil" unless block
       if (direction == :in) || (direction == :any)
@@ -41,38 +50,68 @@ module FayeRails
 
     class DSL
 
-      attr_reader :channel, :message, :callback
+      # A small wrapper class around filter blocks to
+      # add some sugar to ease filter (Faye extension)
+      # creation.
 
+      attr_reader :channel, :message, :callback, :original_message
+
+      # @param block
+      #   The block you wish to execute whenever a matching
+      #   message is recieved.
       def initialize(block)
         raise ArgumentError, "Block cannot be nil" unless block
         @block = block
       end
 
-      def evaluate(message, channel, callback)
+      # Called by FayeRails::Filter when Faye passes
+      # messages in for evaluation.
+      # @param channel
+      #  optional: if present then the block will only be called for matching messages, otherwise all messages will be passed.
+      def evaluate(message, channel=nil, callback)
         @channel = channel
-        @message = message
+        @original_message = @message = message
         @callback = callback
-        if message['channel'] == @channel
-          instance_eval(&@block)
+        if @channel
+          if message['channel'] == @channel
+            instance_eval(&@block)
+          else
+            pass
+          end
         else
-          pass
+          instance_eval(&@block)
         end
       end
       
+      # Syntactic sugar around callback.call which passes
+      # back the original message unmodified.
       def pass
-        return callback.call(message)
+        return callback.call(original_message)
       end
 
+      # Syntactic sugar around callback.call which passes
+      # the passed argument back to Faye in place of the 
+      # original message.
+      # @param new_message
+      #   Replacement message to send back to Faye.
       def modify(new_message)
         return callback.call(new_message)
       end
 
+      # Syntactic sugar around callback.call which adds
+      # an error message to the message and passes it back
+      # to Faye, which will send back a rejection message to
+      # the sending client.
+      # @param reason
+      #   The error message to be sent back to the client.
       def block(reason="Message blocked by filter")
         new_message = message
         new_message['error'] = reason
         return callback.call(new_message)
       end
 
+      # Syntactic sugar around callback.call which returns
+      # nil to Faye - effectively dropping the message.
       def drop
         return callback.call(nil)
       end
