@@ -1,3 +1,3 @@
 module FayeRails
-  VERSION = "2011.12.31"
+  VERSION = "2012.1.5"
 end
