@@ -10,7 +10,7 @@ Due to the limitations of most Rack-based web servers available Faye can only be
       faye_server '/faye', :timeout => 25
     end
 
-You can also pass a block to faye_server which will be executed in the context of the Faye server, thus you can call any methods on `Faye::RackAdapter` from within the block:
+You can also pass a block to `faye_server` which will be executed in the context of the Faye server, thus you can call any methods on `Faye::RackAdapter` from within the block:
 
     App::Application.routes.draw do
       faye_server '/faye', :timeout => 25 do
@@ -42,11 +42,11 @@ faye-rails includes a controller for handling the binding between model events a
 
 You can subscribe to changes in models using the controller's observer DSL:
 
-   class WidgetController < FayeRails::Controller
-     observe Widget, :create do |new_widget|
-       publish('/widgets', new_widget.attributes)
-     end
-   end
+    class WidgetController < FayeRails::Controller
+      observe Widget, :create do |new_widget|
+        publish('/widgets', new_widget.attributes)
+      end
+    end
 
 See the [rdoc](http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/Controller.observe) for more information.
 
