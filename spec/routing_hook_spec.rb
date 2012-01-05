@@ -17,8 +17,15 @@ describe "Routing hooks" do
   shared_examples_for "a Faye server" do
     self.use_transactional_fixtures = false
 
-    it "should have Event Machine reactor running" do
+    before do
       Faye.ensure_reactor_running!
+    end
+
+    after do
+      EM.stop_event_loop
+    end
+
+    it "should have Event Machine reactor running" do
       EM.reactor_running?.should be_true
     end
 
@@ -29,12 +36,11 @@ describe "Routing hooks" do
         FayeRails.server.bind(:subscribe) do |client_id, _channel|
           this_fiber.resume _channel if _channel == channel
         end
-        EM.defer do
-          client.subscribe(channel) do |msg|
-          end
+        EM.schedule do
+          client.subscribe(channel) { |msg| }
         end
-        EM.add_timer(5) do
-          this_fiber.resume "timeout" if this_fiber.alive?
+        EM.add_timer 5 do
+          this_fiber.resume "timeout"
         end
         Fiber.yield.should == channel
       end.resume
@@ -48,11 +54,11 @@ describe "Routing hooks" do
         FayeRails.client.subscribe(channel) do |msg|
           this_fiber.resume msg
         end
-        EM.defer do
+        EM.schedule do
           client.publish(channel, message)
         end
-        EM.add_timer(5) do
-          this_fiber.resume "timeout" if this_fiber.alive?
+        EM.add_timer 5 do
+          this_fiber.resume "timeout"
         end
         Fiber.yield.should == message
       end.resume
@@ -60,31 +66,13 @@ describe "Routing hooks" do
 
   end
 
-  describe "/faye_without_websockets" do
+  describe "/faye" do
 
     let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_without_websockets.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_without_websockets") }
 
     it_should_behave_like "an automatically added route"
     it_should_behave_like "a Faye server"
-
-    it "should have websockets disabled" do
-      routes.first.app.instance_variable_get(:@enable_websockets).should be(false)
-    end
-
-  end
-
-  describe "/faye_with_websockets" do
-
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_with_websockets.*$/ } }
-    let(:client) { Faye::Client.new("ws://localhost:3000/faye_with_websockets") }
-
-    it_should_behave_like "an automatically added route"
-    it_should_behave_like "a Faye server"
-
-    it "should have websockets enabled" do
-      routes.first.app.instance_variable_get(:@enable_websockets).should be(true)
-    end
 
   end
 

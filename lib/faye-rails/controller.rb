@@ -1,5 +1,8 @@
 module FayeRails
   class Controller
+    autoload :Channel, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'channel')
+    autoload :Monitor, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'monitor')
+    autoload :Message, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'message')
 
     attr :channels, :model
 
@@ -17,17 +20,11 @@ module FayeRails
       end
     end
 
-    # Pass in the name of a channel to subscribe to
-    # and anytime 
-    def self.subscribe(channel, endpoint=nil, &block)
-      if block && block.respond_to?(:call)
-        FayeRails.client(endpoint).subscribe(channel) do |message|
-          instance_eval do
-            block.call message
-          end
-        end
-        (@channels ||= []) << channel
-      end
+    # Bind a number of events to a specific channel.
+    def self.channel(channel, endpoint=nil, &block)
+      channel = Channel.new(channel, endpoint)
+      channel.instance_eval(&block)
+      (@channels ||= []) << channel
     end
 
     def publish(channel, message, endpoint=nil)

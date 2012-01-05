@@ -11,7 +11,11 @@ module FayeRails
     end
 
     def listen(port, ssl_options = nil)
-      Thread.new do
+      if defined? ::Rails
+        Thread.new do
+          super
+        end
+      else
         super
       end
     end
