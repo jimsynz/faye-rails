@@ -87,3 +87,18 @@ You can quickly and easily filter incoming and outgoing messages for your specif
 
 You can add filters for `:in`, `:out` and `:any`, which will allow you to filter messages entering the server, exiting the server or both. The block passed to the `filter` is executed in the context of a `FayeRails::Filter::DSL` instance, which gives you access to the `#message` method, which contains the entire message payload from the client (including meta information you wouldn't see other ways). You also have access to the `#pass`, `#modify`, `#block` and `#drop` methods which are sugar around Faye's callback system - which is accessible via the `#callback` method if you want to do it that way. Check out the [FayeRails::Filter::DSL rdoc](http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/Filter/DSL) for more information.  Please note that all filters must call `callback.call` either via the sugar methods or directly to ensure that requests are not lost (not to mention potential memory leaks).
 
+### Subscribing
+
+You can easily subscribe to a channel using the 'subscribe' method inside your channel block, like so:
+
+    class WidgetController < FayeRails::Controller
+      channel '/widgets' do
+        subscribe do
+	  puts "Received on channel #{channel}: #{message.inspect}"
+	end
+      end
+    end
+
+# Thanks.
+
+Thanks to James Coglan for the excellent Faye Bayeux implementetation and great support for Faye users.
