@@ -39,13 +39,18 @@ module FayeRails
       end
 
       def subscribe(&block)
-        FayeRails.client(endpoint).subscribe(channel) do |message|
+        @subscription = FayeRails.client(endpoint).subscribe(channel) do |message|
           Message.new.tap do |m|
             m.message = message
             m.channel = channel
             m.instance_eval(&block)
           end
         end
+        @subscription
+      end
+
+      def unsubscribe
+        FayeRails.client(endpoint).unsubscribe(@subscription)
       end
 
     end

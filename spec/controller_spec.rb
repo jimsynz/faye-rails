@@ -2,50 +2,75 @@ require 'spec_helper'
 
 describe FayeRails::Controller do
 
-  describe "model observer" do
+  before do
+    Faye.ensure_reactor_running!
+  end
+
+  after do
+    EM.stop_event_loop
+  end
+
+  shared_examples_for "model observer" do
+    self.use_transactional_fixtures = false
     
     it "should fire after record creation" do
-      WidgetController.observe(Widget, :create) do |record|
-        record.message = 'pass'
-        record.save
-      end
-      instance = Widget.create(:message => 'fail')
-      instance.message.should == 'pass'
+      Fiber.new do
+        this_fiber = Fiber.current
+        controller.observe(Widget, :create) do |record|
+          this_fiber.resume record.message
+        end
+        EM.add_timer 5 do
+          this_fiber.resume 'timeout'
+        end
+        EM.schedule do
+          Widget.create(:message => 'pass')
+        end
+        Fiber.yield.should == 'pass'
+      end.resume
     end
 
     it "should fire before record update" do
-      WidgetController.observe(Widget, :update, :before) do |record|
-        record.message = 'updated'
-      end
-      instance = Widget.create(:message => 'original')
-      instance.touch
-      instance.save
-      instance.message.should == 'updated'
+      Fiber.new do
+        this_fiber = Fiber.current
+        controller.observe(Widget, :update, :before) do |record|
+          this_fiber.resume record.message
+        end
+        EM.add_timer 5 do
+          this_fiber.resume 'timeout'
+        end
+        EM.schedule do
+          instance = Widget.create(:message => 'original')
+          instance.message = 'updated'
+          instance.save
+        end
+        Fiber.yield.should == 'updated'
+      end.resume
     end
 
     it "should fire after record destruction" do
-      WidgetController.observe(Widget, :destroy, :after) do |record|
-        record.destroyed?.should == true
-      end
-      instance = Widget.create(:message => 'created')
+      Fiber.new do
+        this_fiber = Fiber.current
+        controller.observe(Widget, :destroy, :after) do |record|
+          this_fiber.resume record.destroyed?
+        end
+        EM.add_timer 5 do
+          this_fiber.resume 'timeout'
+        end
+        EM.schedule do
+          Widget.create(:message => 'created').delete
+        end
+        Fiber.yield.should == true
+      end.resume
     end
 
   end
 
-  describe "channel observer" do
-
-    before do
-      Faye.ensure_reactor_running!
-    end
-
-    after do
-      EM.stop_event_loop
-    end
+  shared_examples_for "channel observer" do
 
     it "should receive messages after subscribe" do
       Fiber.new do
         this_fiber = Fiber.current
-        WidgetController.channel('/widgets/1') do
+        controller.channel('/widgets/1') do
           subscribe do
             this_fiber.resume message
           end
@@ -59,12 +84,31 @@ describe FayeRails::Controller do
         Fiber.yield.should == "Welcome to Spacely Space Sprockets."
       end.resume
     end
+
+    it "should not receive messages after unsubscribe" do
+      Fiber.new do
+        this_fiber = Fiber.current
+        controller.channel('/widgets/99') do
+          subscribe do
+            this_fiber.resume message
+          end
+          unsubscribe
+        end
+        EM.schedule do
+          FayeRails.client.publish('/widgets/99', "Welcome to Spacely Sprockets.")
+        end
+        EM.add_timer 1 do
+          this_fiber.resume 'timeout'
+        end
+        Fiber.yield.should == 'timeout'
+      end.resume
+    end
     
     it "should be able to subscribe to multiple channels" do
       2.upto(10).each do |i|
         Fiber.new do
           this_fiber = Fiber.current
-          WidgetController.channel("/widgets/#{i}") do
+          controller.channel("/widgets/#{i}") do
             subscribe do
               this_fiber.resume message
             end
@@ -83,13 +127,13 @@ describe FayeRails::Controller do
     it "should be able to publish messages" do
       Fiber.new do
         this_fiber = Fiber.current
-        WidgetController.channel('/widgets/11') do
+        controller.channel('/widgets/11') do
           subscribe do
             this_fiber.resume message
           end
         end
         EM.schedule do
-          WidgetController.new.publish('/widgets/11', "Welcome to Spacely Space Sprockets.")
+          controller.new.publish('/widgets/11', "Welcome to Spacely Space Sprockets.")
         end
         EM.add_timer 5 do
           this_fiber.resume "timeout"
@@ -101,7 +145,7 @@ describe FayeRails::Controller do
     it "should be able to monitor subscription events" do
       Fiber.new do
         this_fiber = Fiber.current
-        WidgetController.channel('/widgets/12') do
+        controller.channel('/widgets/12') do
           monitor :subscribe do
             this_fiber.resume true
           end
@@ -116,7 +160,7 @@ describe FayeRails::Controller do
     it "should be able to monitor publish events" do
       Fiber.new do
         this_fiber = Fiber.current
-        WidgetController.channel('/widgets/13') do
+        controller.channel('/widgets/13') do
           monitor :publish do
             this_fiber.resume message
           end
@@ -127,9 +171,27 @@ describe FayeRails::Controller do
         EM.add_timer 5 do
           this_fiber.resume "timeout"
         end
-        Fiber.yeild.should == "Rosey, bring me a beer!"
+        Fiber.yield.should == "Rosey, bring me a beer!"
       end
     end
+
+  end
+
+  describe WidgetController do
+
+    let(:controller) { WidgetController }
+
+    it_should_behave_like "model observer"
+    it_should_behave_like "channel observer"
+
+  end
+
+  describe WidgetController.new do
+    
+    let(:controller) { WidgetController.new }
+
+    it_should_behave_like "model observer"
+    it_should_behave_like "channel observer"
 
   end
 
