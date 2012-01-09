@@ -12,9 +12,8 @@ module FayeRails
 
     def listen(port, ssl_options = nil)
       if defined? ::Rails
-        Thread.new do
-          super
-        end
+        Faye.ensure_reactor_running!
+        super
       else
         super
       end
