@@ -13,7 +13,6 @@ class ServerList < Array
     if at(server.endpoint).size == 0
       super
     else
-      puts self.map(&:endpoint).inspect
       raise ArgumentError, "Server at mount point #{server.endpoint} is already present."
     end
   end

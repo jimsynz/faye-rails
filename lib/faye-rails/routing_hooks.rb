@@ -6,7 +6,6 @@ if defined? ActionDispatch::Routing
       def faye_server(mount_path, options={}, &block)
 
         defaults = {
-          :enable_websockets => false,
           :mount => mount_path||'/faye',
           :timeout => 25,
           :engine => nil
