@@ -19,6 +19,11 @@ class ServerList < Array
   end
   alias push <<
 
-  alias clear! clear
+  def clear!
+    self.each do |server|
+      server.stop
+    end
+    clear
+  end
 end
 
