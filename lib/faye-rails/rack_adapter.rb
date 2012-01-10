@@ -23,7 +23,11 @@ module FayeRails
       if opts.is_a? Hash
         opts.each do |channel, controller|
           if channel.is_a? String
-            routing_extension.map(channel, controller)
+            if File.fnmatch?('/**', channel)
+              routing_extension.map(channel, controller)
+            else
+              raise ArgumentError, "Invalid channel: #{channel}"
+            end
           elsif channel == :default
             if controller == :block
               routing_extension.block_unknown_channels!
@@ -37,6 +41,10 @@ module FayeRails
       end
     end
 
+    def debug_messages
+      add_extension(DebugMessagesExtension.new)
+    end
+
     private 
 
     def routing_extension
@@ -44,28 +52,50 @@ module FayeRails
         @routing_extension
       else
         @routing_extension = RoutingExtension.new
-        server.add_extension(@routing_extension)
+        add_extension(@routing_extension)
         @routing_extension
       end
     end
+    
+    class DebugMessagesExtension
+      
+      def debug(*args)
+        if defined? ::Rails
+          Rails.logger.debug *args
+        else
+          puts *args
+        end
+      end
 
-    class RoutingExtension < Filter
+      def incoming(m,c)
+        debug " **  IN: #{m.inspect}"
+        c.call(m)
+      end
+
+      def outgoing(m,c)
+        debug " ** OUT: #{m.inspect}"
+        c.call(m)
+      end
+    end
+
+    class RoutingExtension 
 
       def initialize
         @default = :allow
         @mappings = {}
-        super nil, :any do
-          if message['channel'] == '/meta/subscribe'
-            take_action_for message['subscription']
-          elsif message['channel'] == '/meta/unsubscribe'
-            take_action_for message['subscription']
-          elsif File.fnmatch?('/meta/*', message['channe'])
-            pass
-          elsif File.fnmatch?('/service/**', message['channel'])
-            pass
-          else
-            take_action_for message['channel']
-          end
+      end
+
+      def incoming(message, callback)
+        if message['channel'] == '/meta/subscribe'
+          take_action_for message, callback, message['subscription']
+        elsif message['channel'] == '/meta/unsubscribe'
+          take_action_for message, callback, message['subscription']
+        elsif File.fnmatch?('/meta/*', message['channel'])
+          callback.call(message)
+        elsif File.fnmatch?('/service/**', message['channel'])
+          callback.call(message)
+        else
+          take_action_for message, callback, message['channel']
         end
       end
 
@@ -89,17 +119,18 @@ module FayeRails
         @default = :allow
       end
 
-      def take_action_for(test)
+      def take_action_for(message, callback, test='')
         if @mappings.keys.select { |glob| File.fnmatch?(glob,test) }.size > 0
-          pass
+          callback.call(message)
         elsif @default == :block
-          block "Permission denied."
+          message['error'] = "Permission denied"
+          callback.call(message)
         elsif @default == :drop
-          drop
+          callback.call(nil)
         elsif @default == :allow
-          allow
+          callback.call(message)
         else
-          drop
+          callback.call(nil)
         end
       end
 
