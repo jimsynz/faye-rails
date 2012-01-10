@@ -19,17 +19,7 @@ module FayeRails
       end
     end
 
-    def routing_extension
-      if @routing_extension
-        @routing_extension
-      else
-        @routing_extension = RoutingExtension.new
-        server.add_extension(@routing_extension)
-      end
-    end
-
     def map(opts)
-      routing_extension
       if opts.is_a? Hash
         opts.each do |channel, controller|
           if channel.is_a? String
@@ -47,6 +37,18 @@ module FayeRails
       end
     end
 
+    private 
+
+    def routing_extension
+      if @routing_extension
+        @routing_extension
+      else
+        @routing_extension = RoutingExtension.new
+        server.add_extension(@routing_extension)
+        @routing_extension
+      end
+    end
+
     class RoutingExtension < Filter
 
       def initialize
@@ -57,13 +59,21 @@ module FayeRails
             take_action_for message['subscription']
           elsif message['channel'] == '/meta/unsubscribe'
             take_action_for message['subscription']
-          elsif message['channel'][0..5] == '/meta/'
+          elsif File.fnmatch?('/meta/*', message['channe'])
             pass
-          elsif message['channel'][0..8] == '/service/'
+          elsif File.fnmatch?('/service/**', message['channel'])
             pass
           else
             take_action_for message['channel']
           end
+        end
+      end
+
+      def map(channel, controller)
+        if File.fnmatch?('/**', channel)
+          (@mappings[channel] ||= []) << controller
+        else
+          raise ArgumentError, "Invalid channel name: #{channel}"
         end
       end
 
@@ -80,7 +90,7 @@ module FayeRails
       end
 
       def take_action_for(test)
-        if @mappings.keys.member? test
+        if @mappings.keys.select { |glob| File.fnmatch?(glob,test) }.size > 0
           pass
         elsif @default == :block
           block "Permission denied."
