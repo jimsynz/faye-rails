@@ -18,5 +18,7 @@ class ServerList < Array
     end
   end
   alias push <<
+
+  alias clear! clear
 end
 

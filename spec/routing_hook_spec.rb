@@ -89,4 +89,24 @@ describe "Routing hooks" do
 
   end
 
+  describe Rails::Application::RoutesReloader do
+
+    let (:routes_reloader) do
+      ObjectSpace.each_object.select { |obj| obj.is_a? Rails::Application }.first.routes_reloader
+    end
+
+    it "should respond to clear_without_faye_servers!" do
+      routes_reloader.respond_to?(:clear_without_faye_servers!).should be_true
+    end
+
+    it "should respond to clear_with_faye_servers!" do
+      routes_reloader.respond_to?(:clear_with_faye_servers!).should be_true
+    end
+
+    it "should alias clear! to clear_with_faye_servers!" do
+      routes_reloader.method(:clear!).should == routes_reloader.method(:clear_with_faye_servers!)
+    end
+
+  end
+
 end

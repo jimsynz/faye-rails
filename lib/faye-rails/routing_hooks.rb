@@ -34,3 +34,19 @@ if defined? ActionDispatch::Routing
   end
 
 end
+
+if defined? Rails::Application::RoutesReloader
+
+  class Rails::Application::RoutesReloader
+
+    def clear_with_faye_servers!
+      FayeRails.servers.clear!
+      clear_without_faye_servers!
+    end
+
+    alias clear_without_faye_servers! clear!
+    alias clear! clear_with_faye_servers!
+
+  end
+
+end
