@@ -68,8 +68,8 @@ describe "Routing hooks" do
 
   describe "/faye" do
 
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_without_websockets.*$/ } }
-    let(:client) { Faye::Client.new("http://localhost:3000/faye_without_websockets") }
+    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_without_extension.*$/ } }
+    let(:client) { Faye::Client.new("http://localhost:3000/faye_without_extension") }
 
     it_should_behave_like "an automatically added route"
     it_should_behave_like "a Faye server"
