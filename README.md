@@ -31,6 +31,17 @@ If you really want to, you can ask Faye to start it's own listening Thin server 
       end
     end
 
+You can also do some rudimentary routing using the map method:
+
+    App::Application.routes.draw do
+      faye_server '/faye', :timeout => 25 do
+        map '/widgets/**' => WidgetsController
+	map :default => :block
+      end
+    end
+
+You can find more details on the #map method in the [rdoc](http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/RackAdapter)
+
 # Controller
 
 faye-rails includes a controller for handling the binding between model events and channels with it's own DSL for managing channel-based events.

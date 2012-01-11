@@ -19,6 +19,23 @@ module FayeRails
       end
     end
 
+    # Rudimentary routing support for channels to controllers.
+    #
+    # @param opts
+    #   a Hash of mappings either string keys (channel globs)
+    #   mapping to controller constants eg:
+    #
+    #     '/widgets/**' => WidgetsController
+    #
+    #   or you can set the behaviour for unknown channels:
+    #
+    #     :default => :block
+    #
+    #   :default can be set to :allow, :drop or :block.
+    #   if :drop is chosen then messages to unknown channels
+    #   will be silently dropped, whereas if you choose 
+    #   :block then the message will be returned with the 
+    #   error "Permission denied."
     def map(opts)
       if opts.is_a? Hash
         opts.each do |channel, controller|
@@ -41,6 +58,8 @@ module FayeRails
       end
     end
 
+    # Adds a very simple extension to the server causing
+    # it to log all messages in and out to Rails.logger.debug.
     def debug_messages
       add_extension(DebugMessagesExtension.new)
     end
