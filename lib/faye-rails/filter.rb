@@ -71,11 +71,10 @@ module FayeRails
         @message = message
         @callback = callback
         @direction = direction
-        if File.fnmatch?(@channel, message['channel'])
-          instance_eval(&block)
-        elsif (message['channel'] == '/meta/subscribe') && message['subscription'] && File.fnmatch?(@channel, message['subscription'])
-          instance_eval(&block)
-        elsif (message['channel'] == '/meta/unsubscribe') && message['subscription'] && File.fnmatch?(@channel, message['subscription'])
+
+        if channel_matches?(@channel, @original_message['channel']) ||
+          (subscribing? && subscription?(@channel)) ||
+          (unsubscribing? && subscription?(@channel))
           instance_eval(&block)
         else
           pass
@@ -123,6 +122,14 @@ module FayeRails
         else
           !!message['client_id']
         end
+      end
+
+      def channel_matches?(glob,test)
+        File.fnmatch? glob, test
+      end
+
+      def subscription?(channel)
+        message['subscription'] && channel_matches?(channel, message['subscription'])
       end
       
       # Syntactic sugar around callback.call which passes
