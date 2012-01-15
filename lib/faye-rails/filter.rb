@@ -116,15 +116,11 @@ module FayeRails
         !!data
       end
 
-      def client_id
-        message['clientId']
-      end
-
       def client_id?(x=nil)
         if !!x
-          client_id == x
+          message['client_id'] == x
         else
-          !!client_id
+          !!message['client_id']
         end
       end
       
