@@ -79,6 +79,23 @@ module FayeRails
           pass
         end
       end
+
+      # Easier than testing message['channel'] every time
+      def subscribing?
+        message['channel'] == '/meta/subscribe'
+      end
+
+      def unsubscribing?
+        message['channel'] == '/meta/unsubscribe'
+      end
+
+      def meta?
+        message['channel'][0..5] == '/meta/'
+      end
+
+      def service?
+        message['channel'][0..8] == '/service/'
+      end
       
       # Syntactic sugar around callback.call which passes
       # back the original message unmodified.
