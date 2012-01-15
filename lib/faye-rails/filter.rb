@@ -67,7 +67,8 @@ module FayeRails
       def initialize(block, message, channel='/**', callback, direction)
         raise ArgumentError, "Block cannot be nil" unless block
         @channel = channel
-        @original_message = @message = message
+        @original_message = message.dup
+        @message = message
         @callback = callback
         @direction = direction
         if File.fnmatch?(@channel, message['channel'])
