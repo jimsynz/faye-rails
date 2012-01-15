@@ -97,12 +97,6 @@ module FayeRails
       def service?
         message['channel'][0..8] == '/service/'
       end
-      
-      # Syntactic sugar around callback.call which passes
-      # back the original message unmodified.
-      def pass
-        return callback.call(original_message)
-      end
 
       def incoming?
         direction == :incoming
@@ -113,6 +107,28 @@ module FayeRails
         direction == :outgoing
       end
       alias out? outgoing?
+
+      def data
+        message['data']
+      end
+
+      def data?
+        !!data
+      end
+
+      def client_id
+        message['clientId']
+      end
+
+      def client_id?(x)
+        client_id == x
+      end
+      
+      # Syntactic sugar around callback.call which passes
+      # back the original message unmodified.
+      def pass
+        return callback.call(original_message)
+      end
 
       # Syntactic sugar around callback.call which passes
       # the passed argument back to Faye in place of the 
