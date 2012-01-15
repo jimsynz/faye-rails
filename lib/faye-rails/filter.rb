@@ -36,11 +36,11 @@ module FayeRails
     end
 
     def incoming(message, callback)
-      @in_filter.new(@block, message, channel, callback) if @in_filter
+      @in_filter.new(@block, message, channel, callback, :incoming) if @in_filter
     end
 
     def outgoing(message, callback)
-      @out_filter.new(@block, message, channel, callback) if @out_filter
+      @out_filter.new(@block, message, channel, callback, :outgoing) if @out_filter
     end
 
     def destroy
@@ -55,7 +55,7 @@ module FayeRails
       # add some sugar to ease filter (Faye extension)
       # creation.
 
-      attr_reader :channel, :message, :callback, :original_message
+      attr_reader :channel, :message, :callback, :original_message, :direction
 
       # Called by FayeRails::Filter when Faye passes
       # messages in for evaluation.
@@ -64,11 +64,12 @@ module FayeRails
       #   message is recieved.
       # @param channel
       #  optional: if present then the block will only be called for matching messages, otherwise all messages will be passed.
-      def initialize(block, message, channel='/**', callback)
+      def initialize(block, message, channel='/**', callback, direction)
         raise ArgumentError, "Block cannot be nil" unless block
         @channel = channel
         @original_message = @message = message
         @callback = callback
+        @direction = direction
         if File.fnmatch?(@channel, message['channel'])
           instance_eval(&block)
         elsif (message['channel'] == '/meta/subscribe') && message['subscription'] && File.fnmatch?(@channel, message['subscription'])
@@ -102,6 +103,16 @@ module FayeRails
       def pass
         return callback.call(original_message)
       end
+
+      def incoming?
+        direction == :incoming
+      end
+      alias in? incoming?
+
+      def outgoing?
+        direction == :outgoing
+      end
+      alias out? outgoing?
 
       # Syntactic sugar around callback.call which passes
       # the passed argument back to Faye in place of the 
