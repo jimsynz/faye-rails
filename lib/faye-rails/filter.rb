@@ -120,8 +120,12 @@ module FayeRails
         message['clientId']
       end
 
-      def client_id?(x)
-        client_id == x
+      def client_id?(x=nil)
+        if !!x
+          client_id == x
+        else
+          !!client_id
+        end
       end
       
       # Syntactic sugar around callback.call which passes
