@@ -25,8 +25,6 @@ if defined? ActionDispatch::Routing
 
         match options[:mount] => adapter
 
-        ::Faye.ensure_reactor_running!
-
       end
 
     end
