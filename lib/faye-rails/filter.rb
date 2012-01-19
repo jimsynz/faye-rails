@@ -36,11 +36,19 @@ module FayeRails
     end
 
     def incoming(message, callback)
-      @in_filter.new(@block, message, channel, callback, :incoming) if @in_filter
+      begin
+        @in_filter.new(@block, message, channel, callback, :incoming) if @in_filter
+      rescue Exception => e
+        Rails.logger.warn("Exception in filter #{@in_filter.inspect}:, #{e.inspect}")
+      end
     end
 
     def outgoing(message, callback)
-      @out_filter.new(@block, message, channel, callback, :outgoing) if @out_filter
+      begin
+        @out_filter.new(@block, message, channel, callback, :outgoing) if @out_filter
+      rescue Exception => e
+        Rails.logger.warn("Exception in filter #{@out_filter.inspect}:, #{e.inspect}")
+      end
     end
 
     def destroy
