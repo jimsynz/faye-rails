@@ -3,6 +3,7 @@ module FayeRails
 
     attr_accessor :server
     attr_reader   :channel
+    attr_writer   :logger
 
     # Create a new FayeRails::Filter which can be passed to
     # Faye::RackAdapter#add_extension.
@@ -35,20 +36,35 @@ module FayeRails
       end
     end
 
-    def incoming(message, callback)
-      begin
-        @in_filter.new(@block, message, channel, callback, :incoming) if @in_filter
-      rescue Exception => e
-        Rails.logger.warn("Exception in filter #{@in_filter.inspect}:, #{e.inspect}")
+    def logger
+      if defined?(::Rails)
+        @logger ||= Rails.logger
       end
     end
 
-    def outgoing(message, callback)
+    def incoming_with_exception_handling(message, callback)
       begin
-        @out_filter.new(@block, message, channel, callback, :outgoing) if @out_filter
+        incoming_without_exception_handling(message, callback)
       rescue Exception => e
-        Rails.logger.warn("Exception in filter #{@out_filter.inspect}:, #{e.inspect}")
+        logger.warn("Exception in filter #{@in_filter.inspect}:, #{e.inspect}")
       end
+    end
+
+    def outgoing_with_exception_handling(message, callback)
+      begin
+        incoming_without_exception_handling(message, callback)
+      rescue Exception => e
+        logger.warn("Exception in filter #{@out_filter.inspect}:, #{e.inspect}")
+      end
+    end
+
+    def incoming_without_exception_handling(message, callback)
+      @in_filter.new(@block, message, channel, callback, :incoming) if @in_filter
+    end
+
+
+    def outgoing_without_exception_handling(message, callback)
+      @out_filter.new(@block, message, channel, callback, :outgoing) if @out_filter
     end
 
     def destroy
@@ -56,6 +72,23 @@ module FayeRails
         server.remove_extension(self)
       end
     end
+
+    def self.catch_exceptions!
+      alias :incoming :incoming_with_exception_handling 
+      alias :outgoing :outgoing_with_exception_handling 
+    end
+
+    def self.dont_catch_exceptions!
+      alias :incoming :incoming_without_exception_handling 
+      alias :outgoing :outgoing_without_exception_handling 
+    end
+
+    if defined?(::Rails) && ['test', 'development'].member?(::Rails.env)
+      catch_exceptions!
+    else
+      dont_catch_exceptions!
+    end
+
 
     class DSL
 
