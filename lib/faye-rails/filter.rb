@@ -42,28 +42,12 @@ module FayeRails
       end
     end
 
-    def incoming_with_exception_handling(message, callback)
-      begin
-        incoming_without_exception_handling(message, callback)
-      rescue Exception => e
-        logger.warn("Exception in filter #{@in_filter.inspect}:, #{e.inspect}")
-      end
-    end
-
-    def outgoing_with_exception_handling(message, callback)
-      begin
-        incoming_without_exception_handling(message, callback)
-      rescue Exception => e
-        logger.warn("Exception in filter #{@out_filter.inspect}:, #{e.inspect}")
-      end
-    end
-
-    def incoming_without_exception_handling(message, callback)
+    def incoming(message, callback)
       @in_filter.new(@block, message, channel, callback, :incoming) if @in_filter
     end
 
 
-    def outgoing_without_exception_handling(message, callback)
+    def outgoing(message, callback)
       @out_filter.new(@block, message, channel, callback, :outgoing) if @out_filter
     end
 
@@ -72,23 +56,6 @@ module FayeRails
         server.remove_extension(self)
       end
     end
-
-    def self.catch_exceptions!
-      alias :incoming :incoming_with_exception_handling 
-      alias :outgoing :outgoing_with_exception_handling 
-    end
-
-    def self.dont_catch_exceptions!
-      alias :incoming :incoming_without_exception_handling 
-      alias :outgoing :outgoing_without_exception_handling 
-    end
-
-    if defined?(::Rails) && ['test', 'development'].member?(::Rails.env)
-      catch_exceptions!
-    else
-      dont_catch_exceptions!
-    end
-
 
     class DSL
 
