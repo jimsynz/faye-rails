@@ -43,8 +43,12 @@ module FayeRails
       (@channels ||= []) << channel
     end
 
-    def publish(channel, message, endpoint=nil)
+    def self.publish(channel, message, endpoint=nil)
       FayeRails.client(endpoint).publish(channel, message)
+    end
+    
+    def publish(channel, message, endpoint=nil)
+      self.class.publish(channel, message, endpoint)
     end
 
     private
