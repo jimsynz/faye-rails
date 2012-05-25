@@ -43,6 +43,10 @@ module FayeRails
       (@channels ||= []) << channel
     end
 
+    def self.publish(channel, message, endpoint=nil)
+      FayeRails.client(endpoint).publish(channel, message)
+    end
+
     def publish(channel, message, endpoint=nil)
       FayeRails.client(endpoint).publish(channel, message)
     end
@@ -71,7 +75,7 @@ module FayeRails
 
     def self.register_action(model_klass, action, upon)
       observe(model_klass, action, upon) do |record|
-        (((((@action_list ||= {})[model_klass] ||= {})[action] ||= {})[upon] ||= {})[:instances] ||= {}).each do |instance, blocks| 
+        (((((@action_list ||= {})[model_klass] ||= {})[action] ||= {})[upon] ||= {})[:instances] ||= {}).each do |instance, blocks|
           blocks.each do |block|
             instance.instance_eval do
               block.call(record)
