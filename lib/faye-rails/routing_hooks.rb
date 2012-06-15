@@ -8,7 +8,8 @@ if defined? ActionDispatch::Routing
         defaults = {
           :mount => mount_path||'/faye',
           :timeout => 25,
-          :engine => nil
+          :engine => nil,
+          :server => 'thin'
         }
 
         unknown_options = options.keys - defaults.keys
@@ -19,6 +20,8 @@ if defined? ActionDispatch::Routing
         end
 
         options = defaults.merge(options)
+
+        Faye::WebSocket.load_adapter(options.delete(:server))
 
         adapter = FayeRails::RackAdapter.new(options)
         adapter.instance_eval(&block) if block.respond_to? :call

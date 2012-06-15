@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.authors     = ["James Harton"]
   s.email       = ["james@sociable.co.nz"]
   s.homepage    = "https://github.com/jamesotron/faye-rails"
-  s.summary     = "Faye bindings for Rails 3.1."
+  s.summary     = "Faye bindings for Rails 3.1+."
   s.license     = 'MIT'
 
   s.add_dependency "faye", ["~> 0.8.2"]
