@@ -95,7 +95,7 @@ describe "Routing hooks" do
   describe Rails::Application::RoutesReloader do
 
     let (:routes_reloader) do
-      ObjectSpace.each_object.select { |obj| obj.is_a? Rails::Application }.first.routes_reloader
+      Dummy::Application.routes_reloader
     end
 
     it "should respond to clear_without_faye_servers!" do
