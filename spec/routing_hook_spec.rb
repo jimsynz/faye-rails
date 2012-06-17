@@ -68,7 +68,7 @@ describe "Routing hooks" do
 
   describe "/faye" do
 
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_without_extension.*$/ } }
+    let(:routes) { Dummy::Application.routes.routes.select { |v| v.name =~ /^faye_without_extension.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_without_extension") }
 
     it_should_behave_like "an automatically added route"
@@ -77,7 +77,7 @@ describe "Routing hooks" do
   end
 
   describe "/faye_with_extension" do
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_with_extension.*$/ } }
+    let(:routes) { Dummy::Application.routes.routes.select { |v| v.name =~ /^faye_with_extension.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_with_extension") }
 
     it_should_behave_like "an automatically added route"
