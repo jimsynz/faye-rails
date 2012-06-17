@@ -9,6 +9,6 @@ Dummy::Application.routes.draw do
         callback.call(message)
       end
     end
-    add_extension(MockExtension)
+    add_extension(MockExtension.new)
   end
 end

@@ -84,7 +84,10 @@ describe "Routing hooks" do
     it_should_behave_like "a Faye server"
 
     it "should be extended with MockExtension" do
-      routes.first.app.instance_variable_get(:@server).instance_variable_get(:@extensions).should include(MockExtension)
+      extension = routes.first.app.instance_variable_get(:@server).instance_variable_get(:@extensions).detect do |extension|
+        extension.instance_of? MockExtension
+      end
+      extension.should_not be_nil
     end
 
   end
