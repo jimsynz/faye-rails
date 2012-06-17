@@ -237,31 +237,4 @@ describe FayeRails::Filter do
 
   end
 
-  describe "Exception handling" do
-
-    it "::catch_exceptions! should log when extensions throw exceptions" do
-      FayeRails::Filter.catch_exceptions!
-      logger = double('logger')
-      filter = FayeRails::Filter.new('/**', :any, Proc.new { raise "BogusException" })
-      filter.logger = logger
-      callback = ->(message) {}
-      logger.should_receive(:warn)
-      filter.incoming(default_message, callback)
-    end
-
-    it "::dont_catch_exceptions! shouldn't log when extensions throw exceptions" do
-      FayeRails::Filter.dont_catch_exceptions!
-      logger = double('logger')
-      filter = FayeRails::Filter.new('/**', :any, Proc.new { raise "BogusException" })
-      filter.logger = logger
-      callback = ->(message) {}
-      logger.should_not_receive(:warn)
-      begin
-        filter.incoming(default_message, callback)
-      rescue
-      end
-    end
-
-  end
-
 end
