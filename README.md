@@ -36,7 +36,7 @@ You can also do some rudimentary routing using the map method:
     App::Application.routes.draw do
       faye_server '/faye', :timeout => 25 do
         map '/widgets/**' => WidgetsController
-	map :default => :block
+        map :default => :block
       end
     end
 
@@ -105,8 +105,8 @@ You can easily subscribe to a channel using the 'subscribe' method inside your c
     class WidgetController < FayeRails::Controller
       channel '/widgets' do
         subscribe do
-	  puts "Received on channel #{channel}: #{message.inspect}"
-	end
+          puts "Received on channel #{channel}: #{message.inspect}"
+        end
       end
     end
 
