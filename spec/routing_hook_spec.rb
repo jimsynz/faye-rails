@@ -99,7 +99,7 @@ describe "Routing hooks" do
     end
 
     it "should respond to clear_without_faye_servers!" do
-      routes_reloader.respond_to?(:clear_without_faye_servers!).should be_true
+      routes_reloader.respond_to?(:clear_without_faye_servers!, true).should be_true
     end
 
     it "should respond to clear_with_faye_servers!" do
