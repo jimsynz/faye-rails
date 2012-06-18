@@ -44,8 +44,7 @@ if defined? Rails::Application::RoutesReloader
       clear_without_faye_servers!
     end
 
-    alias clear_without_faye_servers! clear!
-    alias clear! clear_with_faye_servers!
+    alias_method_chain :clear!, :faye_servers
 
   end
 

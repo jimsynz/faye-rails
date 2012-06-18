@@ -68,7 +68,7 @@ describe "Routing hooks" do
 
   describe "/faye" do
 
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_without_extension.*$/ } }
+    let(:routes) { Dummy::Application.routes.routes.select { |v| v.name =~ /^faye_without_extension.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_without_extension") }
 
     it_should_behave_like "an automatically added route"
@@ -77,14 +77,17 @@ describe "Routing hooks" do
   end
 
   describe "/faye_with_extension" do
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.path =~ /^\/faye_with_extension.*$/ } }
+    let(:routes) { Dummy::Application.routes.routes.select { |v| v.name =~ /^faye_with_extension.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_with_extension") }
 
     it_should_behave_like "an automatically added route"
     it_should_behave_like "a Faye server"
 
     it "should be extended with MockExtension" do
-      routes.first.app.instance_variable_get(:@server).instance_variable_get(:@extensions).should include(MockExtension)
+      extension = routes.first.app.instance_variable_get(:@server).instance_variable_get(:@extensions).detect do |extension|
+        extension.instance_of? MockExtension
+      end
+      extension.should_not be_nil
     end
 
   end
@@ -92,11 +95,11 @@ describe "Routing hooks" do
   describe Rails::Application::RoutesReloader do
 
     let (:routes_reloader) do
-      ObjectSpace.each_object.select { |obj| obj.is_a? Rails::Application }.first.routes_reloader
+      Dummy::Application.routes_reloader
     end
 
     it "should respond to clear_without_faye_servers!" do
-      routes_reloader.respond_to?(:clear_without_faye_servers!).should be_true
+      routes_reloader.respond_to?(:clear_without_faye_servers!, true).should be_true
     end
 
     it "should respond to clear_with_faye_servers!" do

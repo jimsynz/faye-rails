@@ -19,7 +19,7 @@ You can also pass a block to `faye_server` which will be executed in the context
             callback.call(message)
           end
         end
-        add_extension(MockExtension)
+        add_extension(MockExtension.new)
       end
     end
 
