@@ -54,10 +54,12 @@ faye-rails includes a controller for handling the binding between model events a
 You can subscribe to changes in models using the controller's observer DSL:
 
     class WidgetController < FayeRails::Controller
-      observe Widget, :create do |new_widget|
+      observe Widget, :after_create do |new_widget|
         publish('/widgets', new_widget.attributes)
       end
     end
+
+The available callbacks are derived from the ActiveRecord callback stack. See [ActiveRecord::Callbacks](http://api.rubyonrails.org/classes/ActiveRecord/Callbacks.html) for more information regarding the callback queue.
 
 See the [rdoc](http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/Controller.observe) for more information.
 
