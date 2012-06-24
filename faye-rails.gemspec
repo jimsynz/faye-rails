@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.name        = "faye-rails"
   s.version     = "#{FayeRails::VERSION}"
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["James Harton"]
-  s.email       = ["james@sociable.co.nz"]
+  s.authors     = ["James Harton", "Ryan Lovelett"]
+  s.email       = ["james@sociable.co.nz", "ryan@wahvee.com"]
   s.homepage    = "https://github.com/jamesotron/faye-rails"
   s.summary     = "Faye bindings for Rails 3.1+."
   s.license     = 'MIT'
