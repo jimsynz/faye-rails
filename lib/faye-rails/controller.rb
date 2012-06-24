@@ -3,6 +3,7 @@ module FayeRails
     autoload :Channel, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'channel')
     autoload :Monitor, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'monitor')
     autoload :Message, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'message')
+    autoload :ObserverFactory, File.join(FayeRails::ROOT, 'faye-rails', 'controller', 'observer_factory')
 
     attr :channels, :model
 
