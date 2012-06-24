@@ -10,61 +10,6 @@ describe FayeRails::Controller do
     EM.stop_event_loop
   end
 
-  shared_examples_for "model observer" do
-    self.use_transactional_fixtures = false
-    
-    it "should fire after record creation" do
-      Fiber.new do
-        this_fiber = Fiber.current
-        controller.observe(Widget, :create) do |record|
-          this_fiber.resume record.message
-        end
-        EM.add_timer 5 do
-          this_fiber.resume 'timeout'
-        end
-        EM.schedule do
-          Widget.create(:message => 'pass')
-        end
-        Fiber.yield.should == 'pass'
-      end.resume
-    end
-
-    it "should fire before record update" do
-      Fiber.new do
-        this_fiber = Fiber.current
-        controller.observe(Widget, :update, :before) do |record|
-          this_fiber.resume record.message
-        end
-        EM.add_timer 5 do
-          this_fiber.resume 'timeout'
-        end
-        EM.schedule do
-          instance = Widget.create(:message => 'original')
-          instance.message = 'updated'
-          instance.save
-        end
-        Fiber.yield.should == 'updated'
-      end.resume
-    end
-
-    it "should fire after record destruction" do
-      Fiber.new do
-        this_fiber = Fiber.current
-        controller.observe(Widget, :destroy, :after) do |record|
-          this_fiber.resume record.destroyed?
-        end
-        EM.add_timer 5 do
-          this_fiber.resume 'timeout'
-        end
-        EM.schedule do
-          Widget.create(:message => 'created').delete
-        end
-        Fiber.yield.should == true
-      end.resume
-    end
-
-  end
-
   shared_examples_for "channel observer" do
 
     it "should receive messages after subscribe" do
@@ -179,18 +124,72 @@ describe FayeRails::Controller do
 
   describe WidgetController do
 
+    before(:all) do
+      ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
+      ActiveRecord::Migration.create_table :widgets do |t|
+        t.string :name
+        t.timestamps
+      end
+
+      class Widget < ActiveRecord::Base
+
+      end
+    end
+
+    after(:all) do
+      # Close the connection?!
+    end
+
     let(:controller) { WidgetController }
 
-    it_should_behave_like "model observer"
     it_should_behave_like "channel observer"
+
+    it { WidgetController.should respond_to :observe }
+    it { WidgetController.should respond_to :publish }
+    it { WidgetController.should respond_to :channel }
+
+    context "observers" do
+      it "should observe the addition of a new widget" do
+        # Mock the publish method
+        # Make sure that the publish method is called like expected
+        #WidgetController.expects(:publish).at_least_once
+
+        # Add observer to the Widget Controller
+        class WidgetController < FayeRails::Controller
+          observe Widget, :before_validation do |widget|
+            puts "Before Validation"
+          end
+          observe Widget, :after_validation do |widget|
+            puts "After Validation"
+          end
+          observe Widget, :before_save do |widget|
+            puts "Before Save"
+          end
+          observe Widget, :before_create do |widget|
+            puts "Before Create"
+          end
+          observe Widget, :after_create do |widget|
+            puts "After Create"
+          end
+          observe Widget, :after_save do |widget|
+            puts "After Save"
+          end
+          observe Widget, :after_commit do |widget|
+            puts "After Commit"
+          end
+        end
+
+        # Now actually create the widget
+        Widget.create name: "Testing!"
+      end
+    end
 
   end
 
   describe WidgetController.new do
-    
+
     let(:controller) { WidgetController.new }
 
-    it_should_behave_like "model observer"
     it_should_behave_like "channel observer"
 
   end
