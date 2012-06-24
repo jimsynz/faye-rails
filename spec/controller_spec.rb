@@ -172,6 +172,30 @@ describe FayeRails::Controller do
         # Now actually create the widget
         Widget.create name: "Testing!"
       end
+
+      it "should observe and respond to multiple callbacks" do
+        # mock the publish method
+        WidgetController.expects(:publish).at_least(6)
+        ValidateMultipleCallbacks = Proc.new do |widget|
+          # TODO Should be allowed to call
+          #self.publish('/widget', {})
+          WidgetController.publish('/widget', {})
+        end
+
+        # Add observer to the Widget Controller
+        class WidgetController < FayeRails::Controller
+          observe Widget, :before_validation, &ValidateMultipleCallbacks
+          observe Widget, :after_validation, &ValidateMultipleCallbacks
+          observe Widget, :before_save, &ValidateMultipleCallbacks
+          observe Widget, :before_create, &ValidateMultipleCallbacks
+          observe Widget, :after_create, &ValidateMultipleCallbacks
+          observe Widget, :after_save, &ValidateMultipleCallbacks
+          observe Widget, :after_commit, &ValidateMultipleCallbacks
+        end
+
+        # Now actually create the widget
+        Widget.create name: "Testing!"
+      end
     end
 
   end
