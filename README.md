@@ -55,7 +55,7 @@ You can subscribe to changes in models using the controller's observer DSL:
 
     class WidgetController < FayeRails::Controller
       observe Widget, :after_create do |new_widget|
-        publish('/widgets', new_widget.attributes)
+        WidgetController.publish('/widgets', new_widget.attributes)
       end
     end
 
