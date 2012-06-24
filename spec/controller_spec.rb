@@ -175,6 +175,7 @@ describe FayeRails::Controller do
 
       it "should observe and respond to multiple callbacks" do
         # mock the publish method
+        # After Commit does not trigger...therefore it will not count
         WidgetController.expects(:publish).at_least(6)
         ValidateMultipleCallbacks = Proc.new do |widget|
           # TODO Should be allowed to call

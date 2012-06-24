@@ -20,13 +20,13 @@ describe FayeRails::Controller::ObserverFactory do
     end
 
     context "register callbacks" do
-      it { RyanObserver.method_defined?(:before_validation).should be_false }
-      it { RyanObserver.method_defined?(:after_validation).should be_false }
-      it { RyanObserver.method_defined?(:before_save).should be_false }
+      it { RyanObserver.method_defined?(:before_validation).should be_true }
+      it { RyanObserver.method_defined?(:after_validation).should be_true }
+      it { RyanObserver.method_defined?(:before_save).should be_true }
       it { RyanObserver.method_defined?(:before_create).should be_true }
       it { RyanObserver.method_defined?(:after_create).should be_true }
-      it { RyanObserver.method_defined?(:after_save).should be_false }
-      it { RyanObserver.method_defined?(:after_commit).should be_false }
+      it { RyanObserver.method_defined?(:after_save).should be_true }
+      it { RyanObserver.method_defined?(:after_commit).should be_true }
     end
 
     context "registered with ActiveRecord" do

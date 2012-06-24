@@ -17,19 +17,24 @@ module FayeRails
         new_observer = klass_observer.nil?
 
         # Create a new observer if one does not exist
-        klass_observer = Object.const_set(klass_observer_name, Class.new(ActiveRecord::Observer)) if new_observer
+        klass_observer = Object.const_set(klass_observer_name, Class.new(ActiveRecord::Observer) do
+          # TODO Work around this hack.
+          # Have to define all of the available methods when creating the Observer class for the
+          # first time. The methods can then be overriden by the observe DSL. However if they
+          # are not first defined then they will not be registerable.
+          [:before_validation, :after_validation, :before_save, :before_create, :after_create, :after_save, :after_commit].each do |arg|
+            send :define_method, arg do |temp|
+            end
+          end
+        end) if new_observer
 
         # Add the method to the observer
         klass_observer.instance_eval do
           define_method(method_name, &block)
-          define_method(:after_update) do |test|
-            puts "Multiple define!"
-          end
         end
 
         # Add the observer if needed
         if new_observer
-          #puts "New #{klass_observer_name}"
           ActiveRecord::Base.observers << klass_observer
         end
 
