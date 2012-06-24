@@ -9,3 +9,4 @@ pkg/*
 .*.swp
 test/dummy/tmp/*
 demo
+.DS_Store
