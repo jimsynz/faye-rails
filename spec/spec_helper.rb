@@ -1,7 +1,10 @@
 # Configure Rails Environment
-ENV['RAILS_ENV'] = 'test'
+ENV['RAILS_ENV'] ||= 'test'
 
-require File.expand_path('../dummy/spec/spec_helper.rb', __FILE__)
+# Requires supporting ruby files with custom matchers and macros, etc,
+# in spec/support/ and its subdirectories.
+Dir[File.join(File.dirname(__FILE__), "spec/support/**/*.rb")].each {|f| require f}
+Dir[File.join(File.dirname(__FILE__), "dummy/spec/**/*.rb")].each {|f| require f}
 require 'database_cleaner'
 require 'fiber'
 
@@ -33,11 +36,10 @@ end
 Rails.backtrace_cleaner.remove_silencers!
 
 RSpec.configure do |config|
+  config.mock_with :mocha
   config.include(Within)
   config.before(:suite) do
     DatabaseCleaner.strategy = :truncation
-  end
-  config.before(:suite) do
     DatabaseCleaner.start
   end
   config.after(:suite) do
