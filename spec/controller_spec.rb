@@ -153,30 +153,20 @@ describe FayeRails::Controller do
         # Mock the publish method
         # Make sure that the publish method is called like expected
         #WidgetController.expects(:publish).at_least_once
+        ValidateScope = Proc.new do |widget|
+          self.should == WidgetController
+          widget.instance_of?(Widget).should == true
+        end
 
         # Add observer to the Widget Controller
         class WidgetController < FayeRails::Controller
-          observe Widget, :before_validation do |widget|
-            puts "Before Validation"
-          end
-          observe Widget, :after_validation do |widget|
-            puts "After Validation"
-          end
-          observe Widget, :before_save do |widget|
-            puts "Before Save"
-          end
-          observe Widget, :before_create do |widget|
-            puts "Before Create"
-          end
-          observe Widget, :after_create do |widget|
-            puts "After Create"
-          end
-          observe Widget, :after_save do |widget|
-            puts "After Save"
-          end
-          observe Widget, :after_commit do |widget|
-            puts "After Commit"
-          end
+          observe Widget, :before_validation, &ValidateScope
+          observe Widget, :after_validation, &ValidateScope
+          observe Widget, :before_save, &ValidateScope
+          observe Widget, :before_create, &ValidateScope
+          observe Widget, :after_create, &ValidateScope
+          observe Widget, :after_save, &ValidateScope
+          observe Widget, :after_commit, &ValidateScope
         end
 
         # Now actually create the widget
