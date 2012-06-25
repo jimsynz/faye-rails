@@ -1,4 +1,4 @@
-# faye-rails [![Build Status](https://secure.travis-ci.org/RLovelett/faye-rails.png)](http://travis-ci.org/RLovelett/faye-rails)
+# faye-rails [![Build Status](https://secure.travis-ci.org/jamesotron/faye-rails.png)](http://travis-ci.org/jamesotron/faye-rails)
 
 faye-rails is a Ruby gem which handles embedding Faye's rack-based server into the rails stack and providing it with access to controllers and views based on bindings and observers.
 
