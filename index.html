@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>faye-rails</title>
+  <meta name="description" content="Simple Rails glue for the Faye messaging protocol.">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">faye-rails</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Simple Rails glue for the Faye messaging protocol.</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/jamesotron/faye-rails/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/jamesotron/faye-rails/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/jamesotron/faye-rails" class="code">View faye-rails on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>faye-rails <a href="http://travis-ci.org/jamesotron/faye-rails"><img src="https://secure.travis-ci.org/jamesotron/faye-rails.png" alt="Build Status"></a>
+</h1>
+
+<p>faye-rails is a Ruby gem which handles embedding Faye's rack-based server into the rails stack and providing it with access to controllers and views based on bindings and observers.</p>
+
+<h1>Embedded server</h1>
+
+<p>Due to the limitations of most Rack-based web servers available Faye can only be run on Thin, however if you are using thin, then you can add as many Faye servers as you want to the Rails router like so:</p>
+
+<pre><code>App::Application.routes.draw do
+  faye_server '/faye', :timeout =&gt; 25
+end
+</code></pre>
+
+<p>You can also pass a block to <code>faye_server</code> which will be executed in the context of the Faye server, thus you can call any methods on <code>Faye::RackAdapter</code> from within the block:</p>
+
+<pre><code>App::Application.routes.draw do
+  faye_server '/faye', :timeout =&gt; 25 do
+    class MockExtension
+      def incoming(message, callback)
+        callback.call(message)
+      end
+    end
+    add_extension(MockExtension.new)
+  end
+end
+</code></pre>
+
+<p>If you really want to, you can ask Faye to start it's own listening Thin server on an arbitrary port:</p>
+
+<pre><code>App::Application.routes.draw do
+  faye_server '/faye', :timeout =&gt; 25 do
+    listen(9292)
+  end
+end
+</code></pre>
+
+<p>You can also do some rudimentary routing using the map method:</p>
+
+<pre><code>App::Application.routes.draw do
+  faye_server '/faye', :timeout =&gt; 25 do
+    map '/widgets/**' =&gt; WidgetsController
+    map :default =&gt; :block
+  end
+end
+</code></pre>
+
+<p>You can find more details on the #map method in the <a href="http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/RackAdapter">rdoc</a></p>
+
+<h1>Controller</h1>
+
+<p>faye-rails includes a controller for handling the binding between model events and channels with it's own DSL for managing channel-based events.</p>
+
+<pre><code>class WidgetController &lt; FayeRails::Controller
+end
+</code></pre>
+
+<h2>Model observers</h2>
+
+<p>You can subscribe to changes in models using the controller's observer DSL:</p>
+
+<pre><code>class WidgetController &lt; FayeRails::Controller
+  observe Widget, :after_create do |new_widget|
+    WidgetController.publish('/widgets', new_widget.attributes)
+  end
+end
+</code></pre>
+
+<p>The available callbacks are derived from the ActiveRecord callback stack. See <a href="http://api.rubyonrails.org/classes/ActiveRecord/Callbacks.html">ActiveRecord::Callbacks</a> for more information regarding the callback queue.</p>
+
+<p>See the <a href="http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/Controller.observe">rdoc</a> for more information.</p>
+
+<h2>Channel DSL</h2>
+
+<p>The controller DSL elegantly wraps channel-based aspects of the Faye API so that you can easily group code based on specific channels.</p>
+
+<h3>Monitoring</h3>
+
+<p>You can make use of Faye's <a href="http://faye.jcoglan.com/ruby/monitoring.html">monitoring API</a> by adding calls to <code>monitor</code> within the channel block. You are able to monitor <code>:subscribe</code>, <code>:unsubscribe</code> and <code>:publish</code> events. Blocks are executed within the context of a <code>FayeRails::Controller::Monitor</code> instance which will give you access to <code>#client_id</code>, <code>#channel</code> and <code>#data</code> (<code>#data</code> only having a value on <code>:publish</code> events).</p>
+
+<pre><code>class WidgetController &lt; FayeRails::Controller
+  channel '/widgets' do
+    monitor :subscribe do
+      puts "Client #{client_id} subscribed to #{channel}."
+    end
+    monitor :unsubscribe do
+      puts "Client #{client_id} unsubscribed from #{channel}."
+    end
+    monitor :publish do
+      puts "Client #{client_id} published #{data.inspect} to #{channel}."
+    end
+  end
+end
+</code></pre>
+
+<h3>Filtering</h3>
+
+<p>You can quickly and easily filter incoming and outgoing messages for your specific channel using the controller's filter API, which wraps Faye's <a href="http://faye.jcoglan.com/ruby/extensions.html">extensions API</a> in a concise and channel-specific way.</p>
+
+<pre><code>class WidgetController &lt; FayeRails::Controller
+  channel '/widgets' do
+    filter :in do
+      puts "Inbound message #{message}."
+      pass
+    end
+  end
+end
+</code></pre>
+
+<p>You can add filters for <code>:in</code>, <code>:out</code> and <code>:any</code>, which will allow you to filter messages entering the server, exiting the server or both. The block passed to the <code>filter</code> is executed in the context of a <code>FayeRails::Filter::DSL</code> instance, which gives you access to the <code>#message</code> method, which contains the entire message payload from the client (including meta information you wouldn't see other ways). You also have access to the <code>#pass</code>, <code>#modify</code>, <code>#block</code> and <code>#drop</code> methods which are sugar around Faye's callback system - which is accessible via the <code>#callback</code> method if you want to do it that way. Check out the <a href="http://rubydoc.info/github/jamesotron/faye-rails/master/FayeRails/Filter/DSL">FayeRails::Filter::DSL rdoc</a> for more information.  Please note that all filters must call <code>callback.call</code> either via the sugar methods or directly to ensure that requests are not lost (not to mention potential memory leaks).</p>
+
+<h3>Subscribing</h3>
+
+<p>You can easily subscribe to a channel using the 'subscribe' method inside your channel block, like so:</p>
+
+<pre><code>class WidgetController &lt; FayeRails::Controller
+  channel '/widgets' do
+    subscribe do
+      puts "Received on channel #{channel}: #{message.inspect}"
+    end
+  end
+end
+</code></pre>
+
+<h1>Thanks.</h1>
+
+<p>Thanks to James Coglan for the excellent Faye Bayeux implementetation and great support for Faye users.</p>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/jamesotron" class="avatar"><img src="https://secure.gravatar.com/avatar/d468b182b11cdee834dd1f9777645b79?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" width="48" height="48"/></a> <a href="https://github.com/jamesotron">jamesotron</a> maintains <a href="https://github.com/jamesotron/faye-rails">faye-rails</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br/>theme by <a href="http://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/jamesotron/faye-rails/tarball/master" class="tar">tar</a><a href="https://github.com/jamesotron/faye-rails/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
