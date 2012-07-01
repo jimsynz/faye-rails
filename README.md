@@ -45,7 +45,7 @@ You can find more details on the #map method in the [rdoc](http://rubydoc.info/g
 # Rails Asset Pipeline Considerations
 
 The faye-browser-min.js.map file may cause asset compilation errors if a .map mime-type is not registered with Rack.
-To avoid asset compilation errors, add the mime type definition in your `config\initializers\mime_types.rb` file like so:
+To avoid asset compilation errors, add the mime type definition in your `config/initializers/mime_types.rb` file like so:
 
     Rack::Mime::MIME_TYPES.merge!({".map" => "text/plain"})
 
