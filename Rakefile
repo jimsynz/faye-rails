@@ -19,7 +19,7 @@ task :bundle do
 end
 
 task :import_javascript_client => :bundle do
-  system "cp -v `bundle show faye`/lib/faye-browser*.js vendor/assets/javascripts"
+  system "cp -v `bundle show faye`/lib/faye-browser* vendor/assets/javascripts"
   system "cp -v `bundle show faye`/lib/faye-browser-min.js vendor/assets/javascripts/faye.js"
 end
 
