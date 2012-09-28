@@ -13,7 +13,7 @@ Faye.extend = function(dest, source, overwrite) {
 };
 
 Faye.extend(Faye, {
-  VERSION:          '0.8.2',
+  VERSION:          '0.8.3',
   
   BAYEUX_VERSION:   '1.0',
   ID_LENGTH:        128,
@@ -715,10 +715,11 @@ Faye.Client = Faye.Class({
   initialize: function(endpoint, options) {
     this.info('New client created for ?', endpoint);
     
+    this._options   = options || {};
     this.endpoint   = endpoint || this.DEFAULT_ENDPOINT;
+    this.endpoints  = this._options.endpoints || {};
     this._cookies   = Faye.CookieJar && new Faye.CookieJar();
     this._headers   = {};
-    this._options   = options || {};
     this._disabled  = [];
     this.retry      = this._options.retry || this.DEFAULT_RETRY;
     
@@ -893,12 +894,10 @@ Faye.Client = Faye.Class({
   //                                                     * id
   //                                                     * timestamp
   subscribe: function(channel, callback, context) {
-    if (channel instanceof Array) {
-      for (var i = 0, n = channel.length; i < n; i++) {
-        this.subscribe(channel[i], callback, context);
-      }
-      return;
-    }
+    if (channel instanceof Array)
+      return Faye.map(channel, function(c) {
+        return this.subscribe(c, callback, context);
+      }, this);
     
     var subscription = new Faye.Subscription(this, channel, callback, context),
         force        = (callback === true),
@@ -945,12 +944,10 @@ Faye.Client = Faye.Class({
   //                                                     * id
   //                                                     * timestamp
   unsubscribe: function(channel, callback, context) {
-    if (channel instanceof Array) {
-      for (var i = 0, n = channel.length; i < n; i++) {
-        this.unsubscribe(channel[i], callback, context);
-      }
-      return;
-    }
+    if (channel instanceof Array)
+      return Faye.map(channel, function(c) {
+        return this.unsubscribe(c, callback, context);
+      }, this);
     
     var dead = this._channels.unsubscribe(channel, callback, context);
     if (!dead) return;
@@ -1157,11 +1154,13 @@ Faye.Transport = Faye.extend(Faye.Class({
     if (connectionTypes === undefined) connectionTypes = this.supportedConnectionTypes();
     
     Faye.asyncEach(this._transports, function(pair, resume) {
-      var connType = pair[0], klass = pair[1];
+      var connType     = pair[0], klass = pair[1],
+          connEndpoint = client.endpoints[connType] || endpoint;
+      
       if (Faye.indexOf(connectionTypes, connType) < 0) return resume();
       
-      klass.isUsable(endpoint, function(isUsable) {
-        if (isUsable) callback.call(context, new klass(client, endpoint));
+      klass.isUsable(connEndpoint, function(isUsable) {
+        if (isUsable) callback.call(context, new klass(client, connEndpoint));
         else resume();
       });
     }, function() {
@@ -1253,41 +1252,32 @@ Faye.URI = Faye.extend(Faye.Class({
   
   toURL: function() {
     var query = this.queryString();
-    return this.protocol + this.hostname + ':' + this.port +
+    return this.protocol + this.hostname + (this.port ? ':' + this.port : '') +
            this.pathname + (query ? '?' + query : '');
   }
 }), {
   parse: function(url, params) {
     if (typeof url !== 'string') return url;
     
-    var location = new this();
+    var a   = document.createElement('a'),
+        uri = new this();
     
-    var consume = function(name, pattern) {
-      url = url.replace(pattern, function(match) {
-        if (match) location[name] = match;
-        return '';
-      });
-    };
-    consume('protocol', /^https?\:\/+/);
-    consume('hostname', /^[^\/\:]+/);
-    consume('port',     /^:[0-9]+/);
+    a.href = url;
     
-    Faye.extend(location, {
-      protocol:   Faye.ENV.location.protocol + '//',
-      hostname:   Faye.ENV.location.hostname,
-      port:       Faye.ENV.location.port
-    }, false);
+    uri.protocol = a.protocol + '//';
+    uri.hostname = a.hostname;
+    uri.pathname = a.pathname.replace(/^\/?/, '/');
     
-    if (!location.port) location.port = (location.protocol === 'https://') ? '443' : '80';
-    location.port = location.port.replace(/\D/g, '');
+    if (a.port === '0' || a.port === '')
+      uri.port = (a.protocol === 'https:') ? '443' : '80';
+    else
+      uri.port = a.port;
     
-    var parts = url.split('?'),
-        path  = parts.shift(),
-        query = parts.join('?'),
-    
+    var query = a.search.replace(/^\?/, ''),
         pairs = query ? query.split('&') : [],
         n     = pairs.length,
-        data  = {};
+        data  = {},
+        parts;
     
     while (n--) {
       parts = pairs[n].split('=');
@@ -1295,10 +1285,9 @@ Faye.URI = Faye.extend(Faye.Class({
     }
     if (typeof params === 'object') Faye.extend(data, params);
     
-    location.pathname = path;
-    location.params = data;
+    uri.params = data;
     
-    return location;
+    return uri;
   }
 });
 
@@ -1817,6 +1806,7 @@ Faye.Transport.WebSocket = Faye.extend(Faye.Class(Faye.Transport, {
   },
   
   connect: function() {
+    if (Faye.Transport.WebSocket._unloaded) return;
     if (this._closed) return;
     
     this._state = this._state || this.UNCONNECTED;
@@ -1903,6 +1893,12 @@ Faye.Transport.WebSocket = Faye.extend(Faye.Class(Faye.Transport, {
 
 Faye.extend(Faye.Transport.WebSocket.prototype, Faye.Deferrable);
 Faye.Transport.register('websocket', Faye.Transport.WebSocket);
+
+if (Faye.Event)
+  Faye.Event.on(Faye.ENV, 'beforeunload', function() {
+    Faye.Transport.WebSocket._unloaded = true;
+  });
+
 
 Faye.Transport.EventSource = Faye.extend(Faye.Class(Faye.Transport, {
   initialize: function(client, endpoint) {
@@ -2065,7 +2061,8 @@ Faye.Transport.CORS = Faye.extend(Faye.Class(Faye.Transport, {
       return callback.call(context, false);
     
     if (Faye.ENV.XDomainRequest)
-      return callback.call(context, true);
+      return callback.call(context, Faye.URI.parse(endpoint).protocol ===
+                                    Faye.URI.parse(Faye.ENV.location).protocol);
     
     if (Faye.ENV.XMLHttpRequest) {
       var xhr = new Faye.ENV.XMLHttpRequest();
