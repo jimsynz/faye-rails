@@ -44,9 +44,9 @@ module FayeRails
       def self.observer(class_name)
         klass = Module.const_get(class_name)
         return klass if klass.is_a?(Class)
-        return nil
+        nil
       rescue
-        return nil
+        nil
       end
 
     end

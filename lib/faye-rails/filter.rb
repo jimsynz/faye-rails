@@ -143,7 +143,7 @@ module FayeRails
       # Syntactic sugar around callback.call which passes
       # back the original message unmodified.
       def pass
-        return callback.call(original_message)
+        callback.call(original_message)
       end
 
       # Syntactic sugar around callback.call which passes
@@ -152,7 +152,7 @@ module FayeRails
       # @param new_message
       #   Replacement message to send back to Faye.
       def modify(new_message)
-        return callback.call(new_message)
+        callback.call(new_message)
       end
 
       # Syntactic sugar around callback.call which adds
@@ -164,13 +164,13 @@ module FayeRails
       def block(reason="Message blocked by filter")
         new_message = message
         new_message['error'] = reason
-        return callback.call(new_message)
+        callback.call(new_message)
       end
 
       # Syntactic sugar around callback.call which returns
       # nil to Faye - effectively dropping the message.
       def drop
-        return callback.call(nil)
+        callback.call(nil)
       end
 
     end
