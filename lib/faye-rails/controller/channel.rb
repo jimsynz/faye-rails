@@ -14,7 +14,7 @@ module FayeRails
       end
 
       def publish(message)
-        FayeRails.client(endpoint).publish(channel, message)
+        client.publish(channel, message)
       end
 
       def monitor(event, &block)
