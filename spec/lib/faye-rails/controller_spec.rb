@@ -48,7 +48,7 @@ describe FayeRails::Controller do
         Fiber.yield.should == 'timeout'
       end.resume
     end
-    
+
     it "should be able to subscribe to multiple channels" do
       2.upto(10).each do |i|
         Fiber.new do
@@ -119,6 +119,25 @@ describe FayeRails::Controller do
         Fiber.yield.should == "Rosey, bring me a beer!"
       end
     end
+
+    it "should be able to monitor wildcard channels" do
+      Fiber.new do
+        this_fiber = Fiber.current
+        controller.channel('/widgets/*') do
+          monitor :publish do
+            this_fiber.resume message
+          end
+        end
+        EM.schedule do
+          FayeRails.client.publish('/widgets/20', "Rosey, bring me a beer!")
+        end
+        EM.add_timer 5 do
+          this_fiber.resume "timeout"
+        end
+        Fiber.yield.should == "Rosey, bring me a beer!"
+      end
+    end
+
 
   end
 
