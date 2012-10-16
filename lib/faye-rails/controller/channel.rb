@@ -25,7 +25,7 @@ module FayeRails
             m.client_id = args.shift
             m.channel = args.shift
             m.data = args.shift
-            m.instance_eval(&block) if m.channel == channel
+            m.instance_eval(&block) if File.fnmatch(channel, m.channel)
           end
         end
       end
@@ -39,7 +39,7 @@ module FayeRails
       end
 
       def subscribe(&block)
-        EM.schedule do 
+        EM.schedule do
           @subscription = FayeRails.client(endpoint).subscribe(channel) do |message|
             Message.new.tap do |m|
               m.message = message
