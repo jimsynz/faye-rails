@@ -8,7 +8,9 @@ if defined? ActionDispatch::Routing
         defaults = {
           :mount => mount_path||'/faye',
           :timeout => 25,
+          :extensions => nil,
           :engine => nil,
+          :ping => nil,
           :server => 'thin'
         }
 
