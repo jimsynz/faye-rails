@@ -22,7 +22,7 @@ describe "Routing hooks" do
     end
 
     after do
-      EM.stop_event_loop
+      EM.stop_event_loop if EM.reactor_running?
     end
 
     it "should have Event Machine reactor running" do

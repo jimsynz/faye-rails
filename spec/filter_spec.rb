@@ -7,7 +7,7 @@ describe FayeRails::Filter do
   end
 
   after do
-    EM.stop_event_loop
+    EM.stop_event_loop if EM.reactor_running?
   end
 
   let(:default_message) { { 'clientId' => rand(0xffffffffff).to_s(16), 'channel' => '/bogus/channel' } }

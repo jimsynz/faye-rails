@@ -7,7 +7,7 @@ describe FayeRails::Controller do
   end
 
   after do
-    EM.stop_event_loop
+    EM.stop_event_loop if EM.reactor_running?
   end
 
   shared_examples_for "channel observer" do
