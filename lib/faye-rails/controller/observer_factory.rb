@@ -3,7 +3,7 @@ require 'active_record'
 module FayeRails
   class Controller
 
-    # Defines callbacks into
+    # Define callbacks into any ORM model.
     module ObserverFactory
 
       # Create
