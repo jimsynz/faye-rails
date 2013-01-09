@@ -28,7 +28,7 @@ if defined? ActionDispatch::Routing
         adapter = FayeRails::RackAdapter.new(options)
         adapter.instance_eval(&block) if block.respond_to? :call
 
-        match options[:mount] => adapter
+        match options[:mount] => adapter, via: :all
 
       end
 
