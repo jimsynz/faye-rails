@@ -6,6 +6,8 @@ faye-rails is a Ruby gem which handles embedding Faye's rack-based server into t
 [![Dependency Status](https://gemnasium.com/jamesotron/faye-rails.png)](https://gemnasium.com/jamesotron/faye-rails)
 [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/jamesotron/faye-rails)
 
+A *very* small demonstration app is available for your perusal [on Heroku](http://faye-rails-demo.herokuapp.com/). The source is [here on Github](https://github.com/jamesotron/faye-rails-demo).
+
 # Embedded server
 
 Due to the limitations of most Rack-based web servers available Faye can only be run on Thin, however if you are using thin, then you can add as many Faye servers as you want to the Rails router like so:
