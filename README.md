@@ -1,10 +1,10 @@
-# faye-rails [![Build Status](https://secure.travis-ci.org/jamesotron/faye-rails.png)](http://travis-ci.org/jamesotron/faye-rails)
+# faye-rails
 
 faye-rails is a Ruby gem which handles embedding Faye's rack-based server into the rails stack and providing it with access to controllers and views based on bindings and observers.
 
 [![Build Status](https://travis-ci.org/jamesotron/faye-rails.png?branch=master)](https://travis-ci.org/jamesotron/faye-rails)
 [![Dependency Status](https://gemnasium.com/jamesotron/faye-rails.png)](https://gemnasium.com/jamesotron/faye-rails)
-[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/jamesotron/faye-rails)
+[![Code Climate](https://codeclimate.com/github/jamesotron/faye-rails.png)](https://codeclimate.com/github/jamesotron/faye-rails)
 
 A *very* small demonstration app is available for your perusal [on Heroku](http://faye-rails-demo.herokuapp.com/). The source is [here on Github](https://github.com/jamesotron/faye-rails-demo).
 
