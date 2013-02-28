@@ -33,8 +33,8 @@ module FayeRails
     #
     #   :default can be set to :allow, :drop or :block.
     #   if :drop is chosen then messages to unknown channels
-    #   will be silently dropped, whereas if you choose 
-    #   :block then the message will be returned with the 
+    #   will be silently dropped, whereas if you choose
+    #   :block then the message will be returned with the
     #   error "Permission denied."
     def map(opts)
       if opts.is_a? Hash
@@ -64,7 +64,7 @@ module FayeRails
       add_extension(DebugMessagesExtension.new)
     end
 
-    private 
+    private
 
     def routing_extension
       if @routing_extension
@@ -75,9 +75,9 @@ module FayeRails
         @routing_extension
       end
     end
-    
+
     class DebugMessagesExtension
-      
+
       def debug(*args)
         if defined? ::Rails
           Rails.logger.debug *args
@@ -97,7 +97,7 @@ module FayeRails
       end
     end
 
-    class RoutingExtension 
+    class RoutingExtension
 
       def initialize
         @default = :allow
