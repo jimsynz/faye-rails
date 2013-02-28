@@ -31,4 +31,4 @@ task :release => :build do
   system "gem push faye-rails-#{FayeRails::VERSION}.gem"
 end
 
-task :default => :spec
+task :default => [ :import_javascript_client, :spec ]
