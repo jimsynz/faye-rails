@@ -5,6 +5,7 @@ faye-rails is a Ruby gem which handles embedding Faye's rack-based server into t
 [![Build Status](https://travis-ci.org/jamesotron/faye-rails.png?branch=master)](https://travis-ci.org/jamesotron/faye-rails)
 [![Dependency Status](https://gemnasium.com/jamesotron/faye-rails.png)](https://gemnasium.com/jamesotron/faye-rails)
 [![Code Climate](https://codeclimate.com/github/jamesotron/faye-rails.png)](https://codeclimate.com/github/jamesotron/faye-rails)
+[![jcog:secure](http://sociable.co.nz/blog/2013/04/18/offical-jcog-secure-badge-for-all-your-software-security-needs/)](http://sociable.co.nz/downloads/images/jcog_secure.png)
 
 A *very* small demonstration app is available for your perusal [on Heroku](http://faye-rails-demo.herokuapp.com/). The source is [here on Github](https://github.com/jamesotron/faye-rails-demo).
 
