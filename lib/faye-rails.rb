@@ -1,6 +1,6 @@
 require 'faye'
 require 'faye-rails/version'
-require 'faye-rails/routing_hooks'
+require 'faye-rails/middleware'
 require 'faye-rails/server_list'
 
 module FayeRails

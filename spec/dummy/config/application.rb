@@ -23,6 +23,19 @@ module Dummy
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
+    config.middleware.use FayeRails::Middleware, mount: '/faye_without_extension', :timeout => 25
+    config.middleware.use FayeRails::Middleware, mount: '/faye_with_extension', :timeout => 25 do
+      class MockExtension
+        def incoming(message, callback)
+          callback.call(message)
+        end
+        def outgoing(message, callback)
+          callback.call(message)
+        end
+      end
+      add_extension(MockExtension.new)
+    end
+
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
 
@@ -49,5 +62,6 @@ module Dummy
 
     config.assets.enabled = true
     config.assets.version = '1.0'
+    config.threadsafe!
   end
 end
