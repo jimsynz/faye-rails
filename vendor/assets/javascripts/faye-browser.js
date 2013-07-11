@@ -2158,4 +2158,4 @@ Faye.Transport.JSONP = Faye.extend(Faye.Class(Faye.Transport, {
 
 Faye.Transport.register('callback-polling', Faye.Transport.JSONP);
 
-})();
+})(this);

@@ -26,7 +26,7 @@ end
 task :wrap_in_closure => :import_javascript_client do
   Dir['vendor/assets/javascripts/*.js'].each do |file|
     js = File.read(file)
-    File.write(file, "(function() {\n#{js}\n})();")
+    File.write(file, "(function() {\n#{js}\n})(this);")
   end
 end
 
