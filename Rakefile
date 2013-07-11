@@ -23,6 +23,13 @@ task :import_javascript_client => :bundle do
   system "cp -v `bundle show faye`/lib/faye-browser-min.js vendor/assets/javascripts/faye.js"
 end
 
+task :wrap_in_closure => :import_javascript_client do
+  Dir['vendor/assets/javascripts/*.js'].each do |file|
+    js = File.read(file)
+    File.write(file, "(function() {\n#{js}\n})();")
+  end
+end
+
 task :build => [ :import_javascript_client, :spec ] do
   system "gem build faye-rails.gemspec"
 end
@@ -31,4 +38,4 @@ task :release => :build do
   system "gem push faye-rails-#{FayeRails::VERSION}.gem"
 end
 
-task :default => [ :import_javascript_client, :spec ]
+task :default => [ :wrap_in_closure, :spec ]
