@@ -1,19 +1,6 @@
 require 'spec_helper'
 
 describe "Routing hooks" do
-
-  shared_examples_for "an automatically added route" do
-
-    it "should only be one route" do
-      routes.size.should be(1)
-    end
-
-    it "should route to FayeRails::RackAdapter" do
-      routes.first.app.should be_a(FayeRails::RackAdapter)
-    end
-
-  end
-
   shared_examples_for "a Faye server" do
     self.use_transactional_fixtures = false
 
@@ -66,50 +53,32 @@ describe "Routing hooks" do
 
   end
 
+  let(:middleware) { Dummy::Application.middleware.select {|m| m == FayeRails::Middleware } }
+
+  describe 'middlware stack' do
+    it "should contain two instance of Faye::Rails" do
+      middleware.count.should == 2
+    end
+  end
+
   describe "/faye" do
-
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.name =~ /^faye_without_extension.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_without_extension") }
-
-    it_should_behave_like "an automatically added route"
     it_should_behave_like "a Faye server"
-
   end
 
   describe "/faye_with_extension" do
-    let(:routes) { Dummy::Application.routes.routes.select { |v| v.name =~ /^faye_with_extension.*$/ } }
     let(:client) { Faye::Client.new("http://localhost:3000/faye_with_extension") }
 
-    it_should_behave_like "an automatically added route"
     it_should_behave_like "a Faye server"
 
     it "should be extended with MockExtension" do
-      extension = routes.first.app.instance_variable_get(:@server).instance_variable_get(:@extensions).detect do |extension|
-        extension.instance_of? MockExtension
+      server = FayeRails.servers.select {|server| server.endpoint =~ /faye_with_extension/ }.first
+      extensions = server.server.instance_variable_get :@extensions
+
+      extension = extensions.detect do |extension|
+        extension.instance_of? Dummy::Application::MockExtension
       end
       extension.should_not be_nil
     end
-
   end
-
-  describe Rails::Application::RoutesReloader do
-
-    let (:routes_reloader) do
-      Dummy::Application.routes_reloader
-    end
-
-    it "should respond to clear_without_faye_servers!" do
-      routes_reloader.respond_to?(:clear_without_faye_servers!, true).should be_true
-    end
-
-    it "should respond to clear_with_faye_servers!" do
-      routes_reloader.respond_to?(:clear_with_faye_servers!).should be_true
-    end
-
-    it "should alias clear! to clear_with_faye_servers!" do
-      routes_reloader.method(:clear!).should == routes_reloader.method(:clear_with_faye_servers!)
-    end
-
-  end
-
 end
