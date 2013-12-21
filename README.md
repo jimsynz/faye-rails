@@ -149,6 +149,16 @@ App::Application.routes.draw do
 end
 ```
 
+# Running on Phusion Passenger
+
+If you want to run faye-rails on passenger, make sure you are using passenger 4.0 standalone or passenger 4.0 on nginx 1.4+ for nginx with websocket support. Passenger on apache is not supported. Because passenger uses a multi-process model, you must use the faye redis backend. Add `gem 'faye-redis'` to your Gemfile and configure your routes like this:
+
+```ruby
+App::Application.routes.draw do
+  faye_server '/faye', timeout: 25, server: 'passenger', engine: {type: Faye::Redis, host: 'localhost'}
+end
+```
+
 # Thanks.
 
 Thanks to James Coglan for the excellent Faye Bayeux implementetation and great support for Faye users.
