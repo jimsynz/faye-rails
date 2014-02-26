@@ -9,6 +9,6 @@ describe "Faye browser javascript" do
 
   it "should match Faye versions" do
     get '/assets/faye.js'
-    response.body.should include("VERSION:'#{Faye::VERSION}'")
+    response.body.should include("VERSION:\"#{Faye::VERSION}\"")
   end
 end
