@@ -23,12 +23,15 @@ if defined? ActionDispatch::Routing
 
         options = defaults.merge(options)
 
-        Faye::WebSocket.load_adapter(options.delete(:server))
+        server = options.delete(:server)
+        Faye::WebSocket.load_adapter(server) if server && server != 'passenger'
 
         adapter = FayeRails::RackAdapter.new(options)
         adapter.instance_eval(&block) if block.respond_to? :call
 
-        match options[:mount] => adapter
+        match_options = {options[:mount] => adapter}
+        match_options.merge!(:via => :all) if Rails.version.to_i >= 4
+        match match_options
 
       end
 
