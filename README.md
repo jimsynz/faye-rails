@@ -11,7 +11,7 @@ A *very* small demonstration app is available for your perusal [on Heroku](http:
 
 # Embedded server
 
-Due to the limitations of most Rack-based web servers available Faye can only be run on Thin, however if you are using thin, then you can add as many Faye servers as you want to Rails like so:
+Due to the limitations of most Rack-based web servers available Faye can only be run on Thin, however if you are using thin, then you can add as many Faye servers as you want to the Rails middleware stack like so:
 
 ```ruby
 # application.rb
