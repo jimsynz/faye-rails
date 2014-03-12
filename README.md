@@ -11,47 +11,42 @@ A *very* small demonstration app is available for your perusal [on Heroku](http:
 
 # Embedded server
 
-Due to the limitations of most Rack-based web servers available Faye can only be run on Thin, however if you are using thin, then you can add as many Faye servers as you want to the Rails router like so:
+Due to the limitations of most Rack-based web servers available Faye can only be run on Thin, however if you are using thin, then you can add as many Faye servers as you want to Rails like so:
 
 ```ruby
-App::Application.routes.draw do
-  faye_server '/faye', :timeout => 25
-end
+# application.rb
+config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25
 ```
 
 You can also pass a block to `faye_server` which will be executed in the context of the Faye server, thus you can call any methods on `Faye::RackAdapter` from within the block:
 
 ```ruby
-App::Application.routes.draw do
-  faye_server '/faye', :timeout => 25 do
-    class MockExtension
-      def incoming(message, callback)
-        callback.call(message)
-      end
+config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25 do
+  # can be defined anywhere, like app/faye_extensions/mock_extension.rb 
+  class MockExtension
+    def incoming(message, callback)
+      callback.call(message)
     end
-    add_extension(MockExtension.new)
   end
+
+  add_extension(MockExtension.new)
 end
 ```
 
 If you really want to, you can ask Faye to start it's own listening Thin server on an arbitrary port:
 
 ```ruby
-App::Application.routes.draw do
-  faye_server '/faye', :timeout => 25 do
-    listen(9292)
-  end
+config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25 do
+  listen(9292)  
 end
 ```
 
 You can also do some rudimentary routing using the map method:
 
 ```ruby
-App::Application.routes.draw do
-  faye_server '/faye', :timeout => 25 do
-    map '/widgets/**' => WidgetsController
-    map :default => :block
-  end
+config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25 do
+  map '/widgets/**' => WidgetsController  
+  map :default => :block
 end
 ```
 
@@ -142,10 +137,8 @@ end
 Often you'll find yourself running the Rails environment without the server running - eg when doing background job processing, or running the console.  If you have any actions which use Faye then you'll need to make sure that you have the EventMachine reactor running.  The easiest solution to this is to create an initialiser in `config/initializers` which calls `Faye.ensure_reactor_running!`. For workers in production you probably also want to make sure that you are using the Redis engine for Faye to ensure that multiple server instances see the same data.
 
 ```ruby
-App::Application.routes.draw do
-  faye_server '/faye', timeout: 25, engine: {type: Faye::Redis, host: 'localhost'} do
-    map '/announce/**' => SomeController
-  end
+config.middleware.use FayeRails::Middleware, mount: '/faye', engine: {type: Faye::Redis, host: 'localhost'}, :timeout => 25 do
+  map '/announce/**' => SomeController  
 end
 ```
 
@@ -154,9 +147,7 @@ end
 If you want to run faye-rails on passenger, make sure you are using passenger 4.0 standalone or passenger 4.0 on nginx 1.4+ for nginx with websocket support. Passenger on apache is not supported. Because passenger uses a multi-process model, you must use the faye redis backend. Add `gem 'faye-redis'` to your Gemfile and configure your routes like this:
 
 ```ruby
-App::Application.routes.draw do
-  faye_server '/faye', timeout: 25, server: 'passenger', engine: {type: Faye::Redis, host: 'localhost'}
-end
+config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25, server: 'passenger', engine: {type: Faye::Redis, host: 'localhost'}
 ```
 
 # Thanks.
