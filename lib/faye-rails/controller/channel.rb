@@ -40,7 +40,7 @@ module FayeRails
 
       def subscribe(&block)
         EM.schedule do
-          @subscription = FayeRails.client(endpoint).subscribe(channel) do |message|
+          FayeRails.client(endpoint).subscribe(channel) do |message|
             Message.new.tap do |m|
               m.message = message
               m.channel = channel
@@ -52,7 +52,7 @@ module FayeRails
 
       def unsubscribe
         EM.schedule do
-          FayeRails.client(endpoint).unsubscribe(@subscription)
+          FayeRails.client(endpoint).unsubscribe(channel)
         end
       end
 
