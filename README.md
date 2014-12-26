@@ -10,7 +10,7 @@ A *very* small demonstration app is available for your perusal [on Heroku](http:
 
 # Heroku Add-on
 
-If you're planning on running Faye on Heroku you're probably goingt to have a bad time.  Take a look at [MessageRocket](https://messagerocket.co/) as an alternative, and help support the author to maintain more great open source projects.
+If you're planning on running Faye on Heroku you're probably going to have a bad time.  Take a look at [MessageRocket](https://messagerocket.co/) as an alternative, and help support the author to maintain more great open source projects.
 
 # Embedded server
 
