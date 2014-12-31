@@ -145,6 +145,8 @@ config.middleware.use FayeRails::Middleware, mount: '/faye', engine: {type: Faye
 end
 ```
 
+See more details in [this issue on GitHub](https://github.com/jamesotron/faye-rails/issues/26).
+
 # Running on Phusion Passenger
 
 If you want to run faye-rails on passenger, make sure you are using passenger 4.0 standalone or passenger 4.0 on nginx 1.4+ for nginx with websocket support. Passenger on apache is not supported. Because passenger uses a multi-process model, you must use the faye redis backend. Add `gem 'faye-redis'` to your Gemfile and configure your routes like this:
