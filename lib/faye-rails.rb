@@ -14,6 +14,7 @@ module FayeRails
   autoload :Controller,        File.join(ROOT, 'faye-rails', 'controller')
   autoload :RackAdapter,       File.join(ROOT, 'faye-rails', 'rack_adapter')
   autoload :Filter,            File.join(ROOT, 'faye-rails', 'filter')
+  autoload :Matcher,           File.join(ROOT, 'faye-rails', 'matcher')
 
   def self.servers
     @servers ||= ServerList.new

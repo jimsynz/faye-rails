@@ -133,7 +133,7 @@ module FayeRails
       end
 
       def channel_matches?(glob,test)
-        File.fnmatch? glob, test
+        FayeRails::Matcher.match? glob, test
       end
 
       def subscription?(channel)

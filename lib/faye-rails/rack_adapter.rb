@@ -40,7 +40,7 @@ module FayeRails
       if opts.is_a? Hash
         opts.each do |channel, controller|
           if channel.is_a? String
-            if File.fnmatch?('/**', channel)
+            if FayeRails::Matcher.match? '/**', channel
               routing_extension.map(channel, controller)
             else
               raise ArgumentError, "Invalid channel: #{channel}"
@@ -105,14 +105,13 @@ module FayeRails
       end
 
       def incoming(message, callback)
-        message['channel'].gsub! "\0", '' if message['channel'].is_a?(String)
         if message['channel'] == '/meta/subscribe'
           take_action_for message, callback, message['subscription']
         elsif message['channel'] == '/meta/unsubscribe'
           take_action_for message, callback, message['subscription']
-        elsif File.fnmatch?('/meta/*', message['channel'])
+        elsif FayeRails::Matcher.match? '/meta/*', message['channel']
           callback.call(message)
-        elsif File.fnmatch?('/service/**', message['channel'])
+        elsif FayeRails::Matcher.match? '/service/**', message['channel']
           callback.call(message)
         else
           take_action_for message, callback, message['channel']
@@ -120,7 +119,7 @@ module FayeRails
       end
 
       def map(channel, controller)
-        if File.fnmatch?('/**', channel)
+        if FayeRails::Matcher.match? '/**', channel
           (@mappings[channel] ||= []) << controller
         else
           raise ArgumentError, "Invalid channel name: #{channel}"
@@ -140,7 +139,7 @@ module FayeRails
       end
 
       def take_action_for(message, callback, test='')
-        if @mappings.keys.select { |glob| File.fnmatch?(glob,test) }.size > 0
+        if @mappings.keys.select { |glob| FayeRails::Matcher.match? glob, test }.size > 0
           callback.call(message)
         elsif @default == :block
           message['error'] = "Permission denied"

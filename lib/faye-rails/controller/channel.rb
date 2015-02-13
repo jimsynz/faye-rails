@@ -25,7 +25,7 @@ module FayeRails
             m.client_id = args.shift
             m.channel = args.shift
             m.data = args.shift
-            m.instance_eval(&block) if File.fnmatch(channel, m.channel)
+            m.instance_eval(&block) if FayeRails::Matcher.match? channel, m.channel
           end
         end
       end
