@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe FayeRails::Controller::Channel do
 
-  let(:channel) { stub(:channel) }
-  let(:endpoint) { stub(:endpoint) }
-  let(:client) { stub(:client) }
-  subject { FayeRails::Controller::Channel.new(channel,endpoint) }
+  let(:channel) { double(:channel) }
+  let(:endpoint) { double(:endpoint) }
+  let(:client) { double(:client) }
+  subject { FayeRails::Controller::Channel.new(channel, endpoint) }
 
   describe '#client' do
     example do
