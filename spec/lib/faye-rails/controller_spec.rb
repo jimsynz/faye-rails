@@ -98,7 +98,7 @@ describe FayeRails::Controller do
         EM.schedule do
           FayeRails.client.subscribe('/widgets/12') { |message| }
         end
-        Fiber.yield.should be_true
+        Fiber.yield.should be_truthy
       end.resume
     end
 

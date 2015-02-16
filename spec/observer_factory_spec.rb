@@ -20,14 +20,14 @@ describe FayeRails::Controller::ObserverFactory do
 
     context "should define a module with callback methods" do
       it { RyanCallbacks.should be_a_kind_of Module }
-      it { RyanCallbacks.method_defined?(:after_create).should be_true }
-      it { RyanCallbacks.method_defined?(:before_create).should be_true }
-      it { RyanCallbacks.method_defined?(:before_update).should be_true }
-      it { RyanCallbacks.method_defined?(:before_validation).should be_false }
-      it { RyanCallbacks.method_defined?(:after_validation).should be_false }
-      it { RyanCallbacks.method_defined?(:before_save).should be_false }
-      it { RyanCallbacks.method_defined?(:after_save).should be_false }
-      it { RyanCallbacks.method_defined?(:after_commit).should be_false }
+      it { RyanCallbacks.method_defined?(:after_create).should be_truthy }
+      it { RyanCallbacks.method_defined?(:before_create).should be_truthy }
+      it { RyanCallbacks.method_defined?(:before_update).should be_truthy }
+      it { RyanCallbacks.method_defined?(:before_validation).should be_falsey }
+      it { RyanCallbacks.method_defined?(:after_validation).should be_falsey }
+      it { RyanCallbacks.method_defined?(:before_save).should be_falsey }
+      it { RyanCallbacks.method_defined?(:after_save).should be_falsey }
+      it { RyanCallbacks.method_defined?(:after_commit).should be_falsey }
     end
 
     context "callbacks should be called" do

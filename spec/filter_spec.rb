@@ -123,7 +123,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(message, callback)
-        Fiber.yield.should be_true
+        Fiber.yield.should be_truthy
       end
     end
 
@@ -138,7 +138,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(default_message, callback)
-        Fiber.yield.should be_false
+        Fiber.yield.should be_falsey
       end
     end
 
@@ -154,7 +154,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(message, callback)
-        Fiber.yield.should be_true
+        Fiber.yield.should be_truthy
       end
     end
 
@@ -169,7 +169,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(default_message, callback)
-        Fiber.yield.should be_false
+        Fiber.yield.should be_falsey
       end
     end
 
@@ -185,7 +185,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(message, callback)
-        Fiber.yield.should be_true
+        Fiber.yield.should be_truthy
       end
     end
 
@@ -200,7 +200,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(default_message, callback)
-        Fiber.yield.should be_false
+        Fiber.yield.should be_falsey
       end
     end
 
@@ -216,7 +216,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(message, callback)
-        Fiber.yield.should be_true
+        Fiber.yield.should be_truthy
       end
     end
 
@@ -231,7 +231,7 @@ describe FayeRails::Filter do
           this_fiber.resume :Timeout
         end
         filter.incoming(default_message, callback)
-        Fiber.yield.should be_false
+        Fiber.yield.should be_falsey
       end
     end
 
