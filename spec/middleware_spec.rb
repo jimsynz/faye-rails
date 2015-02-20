@@ -13,7 +13,7 @@ describe "Routing hooks" do
     end
 
     it "should have Event Machine reactor running" do
-      EM.reactor_running?.should be_true
+      EM.reactor_running?.should be_truthy
     end
 
     it "should be able to subscribe to channel" do

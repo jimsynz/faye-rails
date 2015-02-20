@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Faye browser javascript" do
+describe "Faye browser javascript", :type => :request do
 
   it "should be served by asset pipeline" do
     get '/assets/faye.js'
