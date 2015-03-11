@@ -1,7 +1,6 @@
 *.gem
 .bundle
 .rvmrc
-Gemfile.lock
 pkg/*
 *.rbc
 *.log
