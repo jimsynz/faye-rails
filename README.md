@@ -36,14 +36,6 @@ config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25 do
 end
 ```
 
-If you really want to, you can ask Faye to start it's own listening Thin server on an arbitrary port:
-
-```ruby
-config.middleware.use FayeRails::Middleware, mount: '/faye', :timeout => 25 do
-  listen(9292)  
-end
-```
-
 You can also do some rudimentary routing using the map method:
 
 ```ruby

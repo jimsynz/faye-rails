@@ -10,15 +10,6 @@ module FayeRails
       FayeRails.servers << self
     end
 
-    def listen(port, ssl_options = nil)
-      if defined? ::Rails
-        Faye.ensure_reactor_running!
-        super
-      else
-        super
-      end
-    end
-
     # Rudimentary routing support for channels to controllers.
     #
     # @param opts
