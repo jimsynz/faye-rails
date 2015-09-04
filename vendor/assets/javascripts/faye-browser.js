@@ -3,7 +3,7 @@
 'use strict';
 
 var Faye = {
-  VERSION:          '1.1.1',
+  VERSION:          '1.1.2',
 
   BAYEUX_VERSION:   '1.0',
   ID_LENGTH:        160,
@@ -1694,8 +1694,8 @@ Faye.Transport = Faye.extend(Faye.Class({
     if (!this.batching) return Faye.Promise.fulfilled(this.request([message]));
 
     this._outbox.push(message);
-    this._flushLargeBatch();
     this._promise = this._promise || new Faye.Promise();
+    this._flushLargeBatch();
 
     if (message.channel === Faye.Channel.HANDSHAKE) {
       this.addTimeout('publish', 0.01, this._flush, this);
@@ -2369,7 +2369,7 @@ Faye.Transport.WebSocket = Faye.extend(Faye.Class(Faye.Transport, {
     var promise = new Faye.Promise();
 
     this.callback(function(socket) {
-      if (!socket) return;
+      if (!socket || socket.readyState !== 1) return;
       socket.send(Faye.toJSON(messages));
       Faye.Promise.fulfill(promise, socket);
     }, this);
@@ -2646,6 +2646,7 @@ Faye.Transport.CORS = Faye.extend(Faye.Class(Faye.Transport, {
   request: function(messages) {
     var xhrClass = Faye.ENV.XDomainRequest ? XDomainRequest : XMLHttpRequest,
         xhr      = new xhrClass(),
+        id       = ++Faye.Transport.CORS._id,
         headers  = this._dispatcher.headers,
         self     = this,
         key;
@@ -2662,6 +2663,7 @@ Faye.Transport.CORS = Faye.extend(Faye.Class(Faye.Transport, {
 
     var cleanUp = function() {
       if (!xhr) return false;
+      Faye.Transport.CORS._pending.remove(id);
       xhr.onload = xhr.onerror = xhr.ontimeout = xhr.onprogress = null;
       xhr = null;
     };
@@ -2686,10 +2688,17 @@ Faye.Transport.CORS = Faye.extend(Faye.Class(Faye.Transport, {
     };
 
     xhr.onprogress = function() {};
+
+    if (xhrClass === Faye.ENV.XDomainRequest)
+      Faye.Transport.CORS._pending.add({id: id, xhr: xhr});
+
     xhr.send(this.encode(messages));
     return xhr;
   }
 }), {
+  _id:      0,
+  _pending: new Faye.Set(),
+
   isUsable: function(dispatcher, endpoint, callback, context) {
     if (Faye.URI.isSameOrigin(endpoint))
       return callback.call(context, false);
