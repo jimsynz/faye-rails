@@ -42,7 +42,7 @@ to your application config in application.rb
 
       options = DEFAULTS.merge(options)
       server = options.delete(:server)
-      Faye::WebSocket.load_adapter(server) if server && server != 'passenger'
+      Faye::WebSocket.load_adapter(server) if server
 
       @adapter = FayeRails::RackAdapter.new(@app, options)
       @adapter.instance_eval(&block) if block.respond_to? :call
