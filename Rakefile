@@ -20,7 +20,7 @@ end
 
 task :import_javascript_client => :bundle do
   system "cp -v `bundle show faye`/lib/faye-browser*.js vendor/assets/javascripts"
-  system "sed '/@ sourceMappingURL=faye-browser-min.js.map/d' vendor/assets/javascripts/faye-browser-min.js > vendor/assets/javascripts/faye.js"
+  system "sed '/\\/\\/# sourceMappingURL=faye-browser-min.js.map$/d' vendor/assets/javascripts/faye-browser-min.js > vendor/assets/javascripts/faye.js"
 end
 
 task :wrap_in_closure => :import_javascript_client do
