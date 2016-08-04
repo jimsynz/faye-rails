@@ -96,6 +96,7 @@ module FayeRails
       end
 
       def incoming(message, callback)
+        message['channel'].gsub! "\0", '' if message['channel'].is_a?(String)
         if message['channel'] == '/meta/subscribe'
           take_action_for message, callback, message['subscription']
         elsif message['channel'] == '/meta/unsubscribe'
